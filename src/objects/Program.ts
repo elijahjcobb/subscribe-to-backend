@@ -22,9 +22,33 @@
  *
  */
 
-import { ECSQLDatabase } from "@elijahjcobb/nosql";
+import { ECSQLObject } from "@elijahjcobb/nosql";
+import { ECTimeUnit } from "@elijahjcobb/prototypes";
 
-ECSQLDatabase.init({
-	database: "subscribeto",
-	verbose: true
-});
+export interface ProgramProps {
+	businessId: string;
+	productId: string;
+	price: number;
+	priceInterval: ECTimeUnit;
+	allowance: number;
+	allowanceInterval: ECTimeUnit;
+	successorId: string;
+}
+
+export class Program extends ECSQLObject<ProgramProps> {
+
+	public constructor() {
+
+		super("program", {
+			businessId: "string",
+			productId: "string",
+			price: "number",
+			priceInterval: "number",
+			allowance: "number",
+			allowanceInterval: "number",
+			successorId: "number",
+		});
+
+	}
+
+}

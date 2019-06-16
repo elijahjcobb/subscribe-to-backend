@@ -22,9 +22,24 @@
  *
  */
 
-import { ECSQLDatabase } from "@elijahjcobb/nosql";
+import { ECSQLObject } from "@elijahjcobb/nosql";
 
-ECSQLDatabase.init({
-	database: "subscribeto",
-	verbose: true
-});
+export interface SubscriptionProps {
+	userId: string;
+	programId: string;
+	autoRenew: boolean;
+}
+
+export class Subscription extends ECSQLObject<SubscriptionProps> {
+
+	public constructor() {
+
+		super("subscription", {
+			userId: "string",
+			programId: "string",
+			autoRenew: "boolean"
+		});
+
+	}
+
+}

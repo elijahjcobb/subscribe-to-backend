@@ -22,9 +22,43 @@
  *
  */
 
-import { ECSQLDatabase } from "@elijahjcobb/nosql";
+import { ECSQLObject } from "@elijahjcobb/nosql";
+import { ECDate } from "@elijahjcobb/prototypes";
 
-ECSQLDatabase.init({
-	database: "subscribeto",
-	verbose: true
-});
+export enum UserGender {
+	Male,
+	Female,
+	Other
+}
+
+export interface UserProps {
+	firstName: string;
+	lastName: string;
+	email: string;
+	phone: string;
+	gender: UserGender;
+	birthday: string;
+	salt: Buffer;
+	pepper: Buffer;
+}
+
+export class User extends ECSQLObject<UserProps> {
+
+	public birthday: ECDate = new ECDate();
+
+	public constructor() {
+
+		super("user", {
+			firstName: "string",
+			lastName: "string",
+			email: "string",
+			phone: "string",
+			gender: "number",
+			birthday: "string",
+			salt: "buffer",
+			pepper: "buffer"
+		});
+
+	}
+
+}

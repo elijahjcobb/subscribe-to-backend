@@ -22,9 +22,24 @@
  *
  */
 
-import { ECSQLDatabase } from "@elijahjcobb/nosql";
+import { ECSQLObject } from "@elijahjcobb/nosql";
 
-ECSQLDatabase.init({
-	database: "subscribeto",
-	verbose: true
-});
+export interface BusinessProps {
+	name: string;
+	lat: number;
+	lng: number;
+}
+
+export class Business extends ECSQLObject<BusinessProps> {
+
+	public constructor() {
+
+		super("business", {
+			name: "string",
+			lat: "string",
+			lng: "string"
+		});
+
+	}
+
+}
