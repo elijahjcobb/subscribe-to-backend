@@ -22,8 +22,9 @@
  *
  */
 
-import { ECSQLObject } from "@elijahjcobb/nosql";
-import { ECDate } from "@elijahjcobb/prototypes";
+import {ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery} from "@elijahjcobb/nosql";
+import {ECDate} from "@elijahjcobb/prototypes";
+import {ECErrorOriginType, ECErrorStack, ECErrorType} from "@elijahjcobb/error";
 
 export enum UserGender {
 	Male,
@@ -61,4 +62,19 @@ export class User extends ECSQLObject<UserProps> {
 
 	}
 
+	public static async doesUserExistForEmail(email: string): Promise<boolean> {
+
+		const query: ECSQLQuery<User, UserProps> = new ECSQLQuery(User, new ECSQLFilter(
+			"email",
+			ECSQLOperator.Equal,
+			email
+		));
+
+		return query.exists();
+
+	}
+
+	public static async signUp(email: string, password: string): Promise<User> {
+
+	}
 }
