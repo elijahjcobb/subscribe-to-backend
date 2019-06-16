@@ -25,6 +25,7 @@
 import {ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery} from "@elijahjcobb/nosql";
 import {ECDate} from "@elijahjcobb/prototypes";
 import {ECErrorOriginType, ECErrorStack, ECErrorType} from "@elijahjcobb/error";
+import { ECGenerator } from "@elijahjcobb/encryption";
 
 export enum UserGender {
 	Male,
@@ -76,5 +77,8 @@ export class User extends ECSQLObject<UserProps> {
 
 	public static async signUp(email: string, password: string): Promise<User> {
 
-	}
+		let user: User = new User();
+		user.props.email = email;
+
+		user.props.salt = ECGenerator.randomBytes(32);}
 }
