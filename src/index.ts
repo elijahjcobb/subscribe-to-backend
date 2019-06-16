@@ -35,7 +35,7 @@ ECSQLDatabase.init({
 
 
 
-	let user: User = await User.signIn("elijah@elijahcobb.com", "alpine");
+	let user: User = await User.signIn("elijah@elijahcobb.com", "alpines");
 	user.print();
 
 
