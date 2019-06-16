@@ -99,6 +99,7 @@ export class User extends ECSQLObject<UserProps> {
 
 		user.props.salt = ECGenerator.randomBytes(32);
 		user.props.pepper = this.createPepper(user.props.salt, password);
+		user.props.gender = UserGender.Other;
 
 		await user.create();
 
@@ -116,11 +117,11 @@ export class User extends ECSQLObject<UserProps> {
 		}
 
 		let query: ECSQLQuery<User, UserProps> = new ECSQLQuery(User, new ECSQLFilter("email", ECSQLOperator.Equal, email));
+		query.setLimit(1);
 		let user: User = await query.getFirstObject();
 
 		const pepperProvided: Buffer = this.createPepper(user.props.salt as Buffer, password);
-
-		if (!Buffer.compare(user.props.pepper as Buffer, pepperProvided)) {
+		if (!(user.props.pepper as Buffer).equals(pepperProvided)) {
 
 			throw ECErrorStack.newWithMessageAndType(
 				ECErrorOriginType.User,

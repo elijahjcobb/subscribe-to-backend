@@ -23,8 +23,25 @@
  */
 
 import { ECSQLDatabase } from "@elijahjcobb/nosql";
+import { ECErrorStack } from "@elijahjcobb/error";
+import { User } from "./objects/User";
 
 ECSQLDatabase.init({
 	database: "subscribeto",
 	verbose: true
+});
+
+(async (): Promise<void> => {
+
+
+
+	let user: User = await User.signIn("elijah@elijahcobb.com", "alpine");
+	user.print();
+
+
+})().then(() => {}).catch((err: any) => {
+
+	if (err instanceof ECErrorStack) err.print();
+	else console.error(err);
+
 });
