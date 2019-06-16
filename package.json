@@ -1,0 +1,21 @@
+{
+	"name": "@elijahjcobb/subscribe-to-backend",
+	"scripts": {
+		"compile": "npm run clean && /usr/local/bin/tsc -p tsconfig.json",
+		"clean": "rm -rf dist"
+	},
+	"dependencies": {
+		"@elijahjcobb/nosql": "latest",
+		"@elijahjcobb/collections": "latest",
+		"@elijahjcobb/server": "latest",
+		"@elijahjcobb/encryption": "latest",
+		"@elijahjcobb/error": "latest",
+		"@elijahjcobb/prototypes": "latest",
+		"@elijahjcobb/request": "latest"
+	},
+	"devDependencies": {
+		"@types/node": "latest",
+		"typescript": "latest",
+		"tslint": "latest"
+	}
+}
