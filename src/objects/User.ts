@@ -120,7 +120,7 @@ export class User extends ECSQLObject<UserProps> {
 
 		const pepperProvided: Buffer = this.createPepper(user.props.salt as Buffer, password);
 
-		if (Buffer.compare(user.props.pepper as Buffer, pepperProvided)) {
+		if (!Buffer.compare(user.props.pepper as Buffer, pepperProvided)) {
 
 			throw ECErrorStack.newWithMessageAndType(
 				ECErrorOriginType.User,
