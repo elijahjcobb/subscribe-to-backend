@@ -22,10 +22,10 @@
  *
  */
 
-import {ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery} from "@elijahjcobb/nosql";
-import {ECDate} from "@elijahjcobb/prototypes";
-import {ECErrorOriginType, ECErrorStack, ECErrorType} from "@elijahjcobb/error";
-import { ECGenerator } from "@elijahjcobb/encryption";
+import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
+import { ECDate } from "@elijahjcobb/prototypes";
+import { ECErrorOriginType, ECErrorStack, ECErrorType } from "@elijahjcobb/error";
+import { ECGenerator, ECHash } from "@elijahjcobb/encryption";
 
 export enum UserGender {
 	Male,
@@ -63,6 +63,16 @@ export class User extends ECSQLObject<UserProps> {
 
 	}
 
+	private static createPepper(salt: Buffer, password: string): Buffer {
+
+		const passwordData: Buffer = Buffer.from(password, "utf8");
+		let pepper: Buffer = passwordData;
+		for (let i: number = 0; i < 1000; i++) pepper = ECHash.hash(Buffer.concat([pepper, salt]));
+
+		return pepper;
+
+	}
+
 	public static async doesUserExistForEmail(email: string): Promise<boolean> {
 
 		const query: ECSQLQuery<User, UserProps> = new ECSQLQuery(User, new ECSQLFilter(
@@ -77,8 +87,49 @@ export class User extends ECSQLObject<UserProps> {
 
 	public static async signUp(email: string, password: string): Promise<User> {
 
+		if (await this.doesUserExistForEmail(email)) {
+			throw ECErrorStack.newWithMessageAndType(
+				ECErrorOriginType.User,
+				ECErrorType.ValueAlreadyExists,
+				new Error("A user already exits with this email address."));
+		}
+
 		let user: User = new User();
 		user.props.email = email;
 
-		user.props.salt = ECGenerator.randomBytes(32);}
+		user.props.salt = ECGenerator.randomBytes(32);
+		user.props.pepper = this.createPepper(user.props.salt, password);
+
+		await user.create();
+
+		return user;
+
+	}
+
+	public static async signIn(email: string, password: string): Promise<User> {
+
+		if (!await this.doesUserExistForEmail(email)) {
+			throw ECErrorStack.newWithMessageAndType(
+				ECErrorOriginType.User,
+				ECErrorType.UsernameIncorrect,
+				new Error("A user does not exist for this email address."));
+		}
+
+		let query: ECSQLQuery<User, UserProps> = new ECSQLQuery(User, new ECSQLFilter("email", ECSQLOperator.Equal, email));
+		let user: User = await query.getFirstObject();
+
+		const pepperProvided: Buffer = this.createPepper(user.props.salt as Buffer, password);
+
+		if (pepperProvided !== user.props.pepper) {
+
+			throw ECErrorStack.newWithMessageAndType(
+				ECErrorOriginType.User,
+				ECErrorType.PasswordIncorrect,
+				new Error("Password is incorrect for user."));
+
+		}
+
+		return user;
+
+	}
 }
