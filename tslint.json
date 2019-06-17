@@ -52,7 +52,7 @@
 	  "match-declaration-order"
 	],
 	"only-arrow-functions": true,
-	"prefer-const": true,
+	"prefer-const": false,
 	"quotemark": [
 	  true,
 	  "double"
@@ -107,7 +107,7 @@
 	  "check-decl",
 	  "check-operator",
 	  "check-operator",
-	  "check-module",
+	  //"check-module",
 	  "check-separator",
 	  "check-rest-spread",
 	  "check-type",

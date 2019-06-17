@@ -22,10 +22,18 @@
  *
  */
 
-import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
+import {
+	ECSQLFilter,
+	ECSQLObject,
+	ECSQLObjectRowAcceptedKeyType,
+	ECSQLObjectRowAcceptedValueType, ECSQLObjectRowOverride,
+	ECSQLOperator,
+	ECSQLQuery
+} from "@elijahjcobb/nosql";
 import { ECDate } from "@elijahjcobb/prototypes";
 import { ECErrorOriginType, ECErrorStack, ECErrorType } from "@elijahjcobb/error";
 import { ECGenerator, ECHash } from "@elijahjcobb/encryption";
+import { ECDictionary, ECMap } from "@elijahjcobb/collections";
 
 export enum UserGender {
 	Male,
@@ -63,10 +71,23 @@ export class User extends ECSQLObject<UserProps> {
 
 	}
 
+	public async overrideEncoding(encoded: ECMap<ECSQLObjectRowAcceptedKeyType<UserProps>, ECSQLObjectRowAcceptedValueType>): Promise<ECSQLObjectRowOverride<UserProps>> {
+
+		encoded.set("birthday", this.birthday.toString());
+		return encoded;
+
+	}
+
+	public async overrideDecoding(row: ECDictionary<ECSQLObjectRowAcceptedKeyType<UserProps>, ECSQLObjectRowAcceptedValueType>): Promise<void> {
+
+		const birthday: string | number | undefined = row.get("birthday");
+		if (typeof birthday === "string") this.birthday = ECDate.initWithDateString(row.get("birthday") as string);
+
+	}
+
 	private static createPepper(salt: Buffer, password: string): Buffer {
 
-		const passwordData: Buffer = Buffer.from(password, "utf8");
-		let pepper: Buffer = passwordData;
+		let pepper: Buffer = Buffer.from(password, "utf8");
 		for (let i: number = 0; i < 1000; i++) pepper = ECHash.hash(Buffer.concat([pepper, salt]));
 
 		return pepper;
