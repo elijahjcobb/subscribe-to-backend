@@ -8,7 +8,7 @@
 		"@elijahjcobb/collections": "latest",
 		"@elijahjcobb/encryption": "latest",
 		"@elijahjcobb/error": "latest",
-		"@elijahjcobb/nosql": "latest",
+		"@elijahjcobb/nosql": "0.0.6",
 		"@elijahjcobb/prototypes": "latest",
 		"@elijahjcobb/request": "latest",
 		"@elijahjcobb/server": "latest"
@@ -16,6 +16,8 @@
 	"devDependencies": {
 		"@types/node": "latest",
 		"typescript": "latest",
-		"tslint": "latest"
+		"tslint": "latest",
+		"jest": "latest",
+		"@types/jest": "latest"
 	}
 }

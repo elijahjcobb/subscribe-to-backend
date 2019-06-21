@@ -22,3 +22,32 @@
  *
  */
 
+import { User, UserGender, UserProps } from "../objects/User";
+import { ECSQLDatabase } from "@elijahjcobb/nosql";
+
+ECSQLDatabase.init({
+	database: "subscribeto",
+	verbose: true
+});
+
+describe("User", () => {
+
+	test("Sign Up", async () => {
+
+
+		let user: User;
+
+		try {
+			user = await User.signUp("elijah@elijahcobb.com", "alpine");
+		} catch (e) {
+			e.print();
+		}
+		//
+		// expect(user.id).toBeDefined();
+		// expect(user.props.email).toBeDefined();
+		// expect(user.props.pepper).toBeDefined();
+		// expect(user.props.salt).toBeDefined();
+
+	});
+
+});

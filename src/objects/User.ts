@@ -25,15 +25,11 @@
 import {
 	ECSQLFilter,
 	ECSQLObject,
-	ECSQLObjectRowAcceptedKeyType,
-	ECSQLObjectRowAcceptedValueType, ECSQLObjectRowOverride,
 	ECSQLOperator,
 	ECSQLQuery
 } from "@elijahjcobb/nosql";
-import { ECDate } from "@elijahjcobb/prototypes";
 import { ECErrorOriginType, ECErrorStack, ECErrorType } from "@elijahjcobb/error";
 import { ECGenerator, ECHash } from "@elijahjcobb/encryption";
-import { ECDictionary, ECMap } from "@elijahjcobb/collections";
 
 export enum UserGender {
 	Male,
@@ -41,7 +37,11 @@ export enum UserGender {
 	Other
 }
 
-export interface UserProps {
+export interface TestUser {
+	firstName: string;
+}
+
+export interface UserProps extends TestUser {
 	firstName: string;
 	lastName: string;
 	email: string;
@@ -53,8 +53,6 @@ export interface UserProps {
 }
 
 export class User extends ECSQLObject<UserProps> {
-
-	public birthday: ECDate = new ECDate();
 
 	public constructor() {
 
@@ -68,20 +66,6 @@ export class User extends ECSQLObject<UserProps> {
 			salt: "buffer",
 			pepper: "buffer"
 		});
-
-	}
-
-	public async overrideEncoding(encoded: ECMap<ECSQLObjectRowAcceptedKeyType<UserProps>, ECSQLObjectRowAcceptedValueType>): Promise<ECSQLObjectRowOverride<UserProps>> {
-
-		encoded.set("birthday", this.birthday.toString());
-		return encoded;
-
-	}
-
-	public async overrideDecoding(row: ECDictionary<ECSQLObjectRowAcceptedKeyType<UserProps>, ECSQLObjectRowAcceptedValueType>): Promise<void> {
-
-		const birthday: string | number | undefined = row.get("birthday");
-		if (typeof birthday === "string") this.birthday = ECDate.initWithDateString(row.get("birthday") as string);
 
 	}
 
