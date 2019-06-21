@@ -22,7 +22,7 @@
  *
  */
 
-import { ECSQLDatabase } from "@elijahjcobb/nosql";
+import {ECSQLDatabase, ECSQLQuery} from "@elijahjcobb/nosql";
 import { ECErrorStack } from "@elijahjcobb/error";
 import { User } from "./objects/User";
 
@@ -33,11 +33,10 @@ ECSQLDatabase.init({
 
 (async (): Promise<void> => {
 
-
-
-	let user: User = await User.signIn("elijah@elijahcobb.com", "alpines");
-	user.print();
-
+	let user: User = await ECSQLQuery.getObjectWithId(User, "VOIItnP5g00H8tEq");
+	user.props.firstName = "Elijah";
+	user.props.lastName = undefined;
+	await user.update();
 
 })().then(() => {}).catch((err: any) => {
 
