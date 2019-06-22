@@ -22,25 +22,35 @@
  *
  */
 
-import { ECSQLDatabase } from "@elijahjcobb/nosql";
-import { ECErrorStack } from "@elijahjcobb/error";
-import { User } from "./objects/User";
+import { ECSQLDatabase, ECSQLQuery } from "@elijahjcobb/nosql";
+import { ECSRequest, ECSServer } from "@elijahjcobb/server";
+import { UserRouter } from "./endpoints/UserRouter";
+import { Session } from "./objects/Session";
 
 ECSQLDatabase.init({
 	database: "subscribeto",
 	verbose: true
 });
 
-(async (): Promise<void> => {
+let server: ECSServer = new ECSServer();
 
-	let user: User = await User.signIn("elijah@elijahcobb.com", "alpine");
-	user.print();
+server.setAuthorizationMiddleware(async(req: ECSRequest): Promise<ECSRequest> => {
 
+	const authHeader: string | undefined = req.getHeader("Authorization");
+	if (!authHeader) return req;
 
+	const authSplit: string[] = authHeader.split(" ");
+	const sessionId: string = authSplit[1];
+	if (!sessionId) return req;
 
-})().then(() => {}).catch((err: any) => {
+	const session: Session | undefined = await ECSQLQuery.getObjectWithId(Session, sessionId, true);
+	if (!session) return req;
 
-	if (err instanceof ECErrorStack) err.print();
-	else console.error(err);
+	req.setSession(session);
+	return req;
 
 });
+
+server.use("/user", new UserRouter());
+
+server.startHTTP(3000);

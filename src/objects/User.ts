@@ -30,6 +30,7 @@ import {
 } from "@elijahjcobb/nosql";
 import { ECErrorOriginType, ECErrorStack, ECErrorType } from "@elijahjcobb/error";
 import { ECGenerator, ECHash } from "@elijahjcobb/encryption";
+import { Session } from "./Session";
 
 export enum UserGender {
 	Male,
@@ -66,6 +67,41 @@ export class User extends ECSQLObject<UserProps> {
 			salt: "buffer",
 			pepper: "buffer"
 		});
+
+	}
+
+	public getJSON(): object {
+
+		return this.getFilteredJSON(
+			"id",
+			"email",
+			"firstName",
+			"lastName",
+			"phone",
+			"gender",
+			"birthday",
+			"updatedAt",
+			"createdAt"
+		);
+
+	}
+
+	public async getNewSession(): Promise<Session> {
+
+		if (!this.id) throw Error("You cannot make a session for a user that has not been created.");
+
+		console.log(`Ok so the user has the id: ${this.id}`);
+
+		let session: Session = new Session();
+		session.props.userId = this.id;
+
+		console.log(`Ok so session.props.userId = ${session.props.userId}`);
+
+		await session.create();
+
+		console.log(`toit toit so session has id: ${session.id}`);
+
+		return session;
 
 	}
 
