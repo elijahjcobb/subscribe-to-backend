@@ -8,16 +8,19 @@
 		"@elijahjcobb/collections": "latest",
 		"@elijahjcobb/encryption": "latest",
 		"@elijahjcobb/error": "latest",
-		"@elijahjcobb/nosql": "0.0.6",
+		"@elijahjcobb/nosql": "latest",
 		"@elijahjcobb/prototypes": "latest",
 		"@elijahjcobb/request": "latest",
-		"@elijahjcobb/server": "latest"
+		"@elijahjcobb/server": "latest",
+		"express": "latest",
+		"typit": "latest"
 	},
 	"devDependencies": {
-		"@types/node": "latest",
-		"typescript": "latest",
-		"tslint": "latest",
+		"@types/jest": "latest",
+		"@types/node": "^12.0.10",
+		"@types/express": "latest",
 		"jest": "latest",
-		"@types/jest": "latest"
+		"tslint": "^5.18.0",
+		"typescript": "latest"
 	}
 }
