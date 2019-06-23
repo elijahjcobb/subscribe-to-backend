@@ -23,6 +23,7 @@
  */
 
 import {
+	ECSError,
 	ECSRequest,
 	ECSRequestType,
 	ECSResponse,
@@ -32,9 +33,13 @@ import {
 	ECSValidator
 } from "@elijahjcobb/server";
 import * as Express from "express";
-import { StandardType, ObjectType } from "typit";
+import { StandardType, OptionalType } from "typit";
 import { User } from "../objects/User";
-import { Session } from "../objects/Session";
+import { Session } from "../session/Session";
+import { SessionValidator } from "../session/SessionValidator";
+import { BusinessOwner } from "../objects/BusinessOwner";
+import { Business } from "../objects/Business";
+import { ECSQLQuery } from "@elijahjcobb/nosql";
 
 export class UserRouter extends ECSRouter {
 
@@ -43,10 +48,49 @@ export class UserRouter extends ECSRouter {
 		const session: Session = req.getSession();
 		const user: User = await session.getUser();
 
-		return new ECSResponse({
-			user: user.getJSON(),
-			session: session.getJSON()
-		});
+		return new ECSResponse(user.getJSON());
+
+	}
+
+	public async handleGetSelfSession(req: ECSRequest): Promise<ECSResponse> {
+
+		const session: Session = req.getSession();
+
+		return new ECSResponse(session.getJSON());
+
+	}
+
+	public async handleSetSelfSessionBusiness(req: ECSRequest): Promise<ECSResponse> {
+
+		const session: Session = req.getSession();
+		const businessId: string | undefined  = req.get("id");
+
+		if (businessId === undefined) {
+
+			session.props.businessId = undefined;
+			await session.update();
+
+		} else {
+
+			const business: Business | undefined = await ECSQLQuery.getObjectWithId(Business, businessId, true);
+
+			if (business === undefined) throw ECSError.init().msg("The business you are referencing does not exist.").code(404).show();
+			if (session.props.userId === undefined) throw ECSError.init().msg("Your session does not have a userId.").show().code(400);
+
+			if (await BusinessOwner.isUserIdOwnerOfBusinessId(session.props.userId, businessId)) {
+
+				session.props.businessId = businessId;
+				await session.update();
+
+			} else {
+
+				throw ECSError.init().msg(`You are not an owner of ${business.props.name}.`).code(401).show();
+
+			}
+
+		}
+
+		return new ECSResponse(session.getJSON());
 
 	}
 
@@ -81,33 +125,67 @@ export class UserRouter extends ECSRouter {
 
 	public getRouter(): Express.Router {
 
-		this.add(new ECSRoute(ECSRequestType.GET, "/", this.handleGetSelf));
+		this.add(new ECSRoute(
+			ECSRequestType.GET,
+			"/me",
+			this.handleGetSelf,
+			new ECSValidator(
+				undefined,
+				SessionValidator
+					.init()
+					.user()
+			)
+		));
 
-		this.add(((): ECSRoute => {
+		this.add(new ECSRoute(
+			ECSRequestType.GET,
+			"/me/session",
+			this.handleGetSelfSession,
+			new ECSValidator(
+				undefined,
+				SessionValidator
+					.init()
+					.user()
+			)
+		));
 
-			let validator: ECSValidator = new ECSValidator();
+		this.add(new ECSRoute(
+			ECSRequestType.PUT,
+			"/me/session/business",
+			this.handleSetSelfSessionBusiness,
+			new ECSValidator(
+				new ECSTypeValidator({
+					id: new OptionalType(StandardType.STRING)
+				}),
+				SessionValidator
+					.init()
+					.user()
+			)
+		));
 
-			validator.typeValidator = new ECSTypeValidator(new ObjectType({
-				email: StandardType.STRING,
-				password: StandardType.STRING
-			}));
+		this.add(new ECSRoute(
+			ECSRequestType.POST,
+			"/sign-up",
+			this.handleSignUp,
+			new ECSValidator(
+				new ECSTypeValidator({
+					email: StandardType.STRING,
+					password: StandardType.STRING
+				})
+			)
+		));
 
-			return new ECSRoute(ECSRequestType.POST, "/sign-up", this.handleSignUp, validator);
-
-		})());
-
-		this.add(((): ECSRoute => {
-
-			let validator: ECSValidator = new ECSValidator();
-
-			validator.typeValidator = new ECSTypeValidator(new ObjectType({
-				email: StandardType.STRING,
-				password: StandardType.STRING
-			}));
-
-			return new ECSRoute(ECSRequestType.POST, "/sign-in", this.handleSignIn, validator);
-
-		})());
+		this.add(new ECSRoute(
+			ECSRequestType.POST,
+			"/sign-in",
+			this.handleSignIn,
+			new ECSValidator(
+				new ECSTypeValidator({
+					email: StandardType.STRING,
+					password: StandardType.STRING
+				})
+			)
+		));
 
 		return this.createRouter();
 

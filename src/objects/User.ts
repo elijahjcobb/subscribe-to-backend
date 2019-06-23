@@ -30,7 +30,7 @@ import {
 } from "@elijahjcobb/nosql";
 import { ECErrorOriginType, ECErrorStack, ECErrorType } from "@elijahjcobb/error";
 import { ECGenerator, ECHash } from "@elijahjcobb/encryption";
-import { Session } from "./Session";
+import { Session } from "../session/Session";
 
 export enum UserGender {
 	Male,

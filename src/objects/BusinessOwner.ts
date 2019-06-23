@@ -22,7 +22,16 @@
  *
  */
 
-import { ECSQLObject } from "@elijahjcobb/nosql";
+import {
+	ECSQLCondition,
+	ECSQLFilter,
+	ECSQLFilterGroup,
+	ECSQLObject,
+	ECSQLOperator,
+	ECSQLQuery
+} from "@elijahjcobb/nosql";
+import { ECArray } from "@elijahjcobb/collections";
+import { Business, BusinessProps } from "./Business";
 
 export interface BusinessOwnerProps {
 	userId: string;
@@ -37,6 +46,34 @@ export class BusinessOwner extends ECSQLObject<BusinessOwnerProps> {
 			userId: "string",
 			businessId: "string"
 		});
+
+	}
+
+	public static async isUserIdOwnerOfBusinessId(userId: string, businessId: string): Promise<boolean> {
+
+		const query: ECSQLQuery<BusinessOwner, BusinessOwnerProps> = new ECSQLQuery(BusinessOwner, new ECSQLFilterGroup(
+			ECSQLCondition.And,
+			new ECSQLFilter("userId", ECSQLOperator.Equal, userId),
+			new ECSQLFilter("businessId", ECSQLOperator.Equal, businessId),
+		));
+
+		return await query.exists();
+
+	}
+
+	public static async getAllBusinessIdsForUserId(userId: string): Promise<ECArray<string>> {
+
+		const query: ECSQLQuery<BusinessOwner, BusinessOwnerProps> = new ECSQLQuery(BusinessOwner, new ECSQLFilter("userId", ECSQLOperator.Equal, userId));
+		const links: ECArray<BusinessOwner> = await query.getAllObjects();
+
+		return links.map((link: BusinessOwner) => { return link.props.businessId as string; });
+
+	}
+
+	public static async getAllBusinessesForUserId(userId: string): Promise<ECArray<Business>> {
+
+		const businessIds: ECArray<string> = await this.getAllBusinessIdsForUserId(userId);
+		return await ECSQLQuery.getObjectsWithIds(Business, ...businessIds.toNativeArray());
 
 	}
 

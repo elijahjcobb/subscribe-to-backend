@@ -22,48 +22,17 @@
  *
  */
 
-import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
-import { User } from "../objects/User";
-import { Admin, AdminProps } from "./Admin";
-import { Business } from "../objects/Business";
+import { ECSQLObject } from "@elijahjcobb/nosql";
 
-export interface SessionProps {
-	userId: string;
-	businessId: string;
+export interface AdminProps {
 }
 
-export class Session extends ECSQLObject<SessionProps> {
+export class Admin extends ECSQLObject<AdminProps> {
 
 	public constructor() {
 
-		super("session", {
-			userId: "string",
-			businessId: "string"
+		super("admin", {
 		});
-
-	}
-
-	public async getUser(): Promise<User> {
-
-		if (this.props.userId === undefined) throw Error("Attempted to fetch user for session when session does not have userId.");
-		return await ECSQLQuery.getObjectWithId(User, this.props.userId);
-
-	}
-
-	public async getBusiness(): Promise<Business> {
-
-		if (this.props.businessId === undefined) throw Error("Attempted to fetch business for session when session does not have businessId.");
-		return await ECSQLQuery.getObjectWithId(Business, this.props.businessId);
-
-	}
-
-	public async isAdmin(): Promise<boolean> {
-
-		if (!this.props.userId) return false;
-
-		let admin: Admin | undefined = await ECSQLQuery.getObjectWithId(Admin, this.props.userId, true);
-
-		return admin !== undefined;
 
 	}
 

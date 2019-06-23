@@ -36,8 +36,8 @@ export class Business extends ECSQLObject<BusinessProps> {
 
 		super("business", {
 			name: "string",
-			lat: "string",
-			lng: "string"
+			lat: "number",
+			lng: "number"
 		});
 
 	}
