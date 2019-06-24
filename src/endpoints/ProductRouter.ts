@@ -38,6 +38,7 @@ import { StandardType, OptionalType } from "typit";
 import { Session } from "../session/Session";
 import { Product } from "../objects/Product";
 import { Files } from "../files/Files";
+import {ECSQLQuery} from "@elijahjcobb/nosql";
 
 export class ProductRouter extends ECSRouter {
 
@@ -77,6 +78,15 @@ export class ProductRouter extends ECSRouter {
 
 	}
 
+	public async handleGet(req: ECSRequest): Promise<ECSResponse> {
+
+		const id: string = req.getParameters().get("id") as string;
+		const product: Product = await ECSQLQuery.getObjectWithId(Product, id);
+
+		return new ECSResponse(product.getJSON());
+
+	}
+
 	public getRouter(): Express.Router {
 
 		this.add(new ECSRoute(
@@ -93,6 +103,12 @@ export class ProductRouter extends ECSRouter {
 					.init()
 					.business()
 			)
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.GET,
+			"/:id",
+			this.handleGet
 		));
 
 		return this.createRouter();

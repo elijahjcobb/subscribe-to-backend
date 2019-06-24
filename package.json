@@ -8,7 +8,7 @@
 		"@elijahjcobb/collections": "latest",
 		"@elijahjcobb/encryption": "latest",
 		"@elijahjcobb/error": "latest",
-		"@elijahjcobb/geo": "0.0.2",
+		"@elijahjcobb/geo": "latest",
 		"@elijahjcobb/nosql": "latest",
 		"@elijahjcobb/prototypes": "latest",
 		"@elijahjcobb/request": "latest",
