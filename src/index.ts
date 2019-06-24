@@ -22,18 +22,40 @@
  *
  */
 
-import { ECSQLDatabase, ECSQLQuery } from "@elijahjcobb/nosql";
+import { ECSQLDatabase, ECSQLQuery, ECSQLInitObject } from "@elijahjcobb/nosql";
 import { ECSRequest, ECSServer } from "@elijahjcobb/server";
 import { UserRouter } from "./endpoints/UserRouter";
 import { Session } from "./session/Session";
 import { BusinessRouter } from "./endpoints/BusinessRouter";
 import { ProductRouter } from "./endpoints/ProductRouter";
 import { FilesRouter } from "./endpoints/FilesRouter";
+import * as FileSystem from "fs";
 
-ECSQLDatabase.init({
-	database: "subscribeto",
-	verbose: true
-});
+let databaseConfig: ECSQLInitObject;
+let port: number;
+
+if (process.env.USER === "elijahcobb") {
+
+	databaseConfig = {
+		database: "subscribeto",
+		verbose: true
+	};
+
+	port = 3000;
+
+} else {
+
+	databaseConfig = {
+		database: "subscribeto",
+		password: FileSystem.readFileSync("/root/databasepassword.txt").toString("utf8"),
+		port: 3306
+	};
+
+	port = 80;
+
+}
+
+ECSQLDatabase.init(databaseConfig);
 
 let server: ECSServer = new ECSServer();
 
@@ -60,4 +82,4 @@ server.use("/business", new BusinessRouter());
 server.use("/product", new ProductRouter());
 server.use("/files", new FilesRouter());
 
-server.startHTTP(80);
+server.startHTTP(port);
