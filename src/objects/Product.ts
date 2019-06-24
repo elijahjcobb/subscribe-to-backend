@@ -27,6 +27,7 @@ import { ECSQLObject } from "@elijahjcobb/nosql";
 export interface ProductProps {
 	name: string;
 	description: string;
+	businessId: string;
 }
 
 export class Product extends ECSQLObject<ProductProps> {
@@ -35,7 +36,8 @@ export class Product extends ECSQLObject<ProductProps> {
 
 		super("product", {
 			name: "string",
-			description: "string"
+			description: "string",
+			businessId: "string"
 		});
 
 	}
