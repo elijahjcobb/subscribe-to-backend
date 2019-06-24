@@ -103,7 +103,7 @@ export class BusinessRouter extends ECSRouter {
 		const session: Session = req.getSession();
 
 		const businesses: ECArray<Business> = await BusinessOwner.getAllBusinessesForUserId(session.props.userId as string);
-		const formattedBusinesses: ECArray<object> = businesses.map((business: Business) => {return business.getJSON(); });
+		const formattedBusinesses: ECArray<object> = businesses.map((business: Business) => { return business.getJSON(); });
 
 		return new ECSResponse(formattedBusinesses.toNativeArray());
 
@@ -113,7 +113,7 @@ export class BusinessRouter extends ECSRouter {
 
 		const query: ECSQLQuery<Business, BusinessProps> = new ECSQLQuery(Business);
 		const businesses: ECArray<Business> = await query.getAllObjects();
-		const formattedBusinesses: ECArray<object> = businesses.map((business: Business) => {return business.getJSON(); });
+		const formattedBusinesses: ECArray<object> = businesses.map((business: Business) => { return business.getJSON(); });
 
 		return new ECSResponse(formattedBusinesses.toNativeArray());
 

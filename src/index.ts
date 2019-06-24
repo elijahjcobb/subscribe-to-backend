@@ -27,6 +27,8 @@ import { ECSRequest, ECSServer } from "@elijahjcobb/server";
 import { UserRouter } from "./endpoints/UserRouter";
 import { Session } from "./session/Session";
 import { BusinessRouter } from "./endpoints/BusinessRouter";
+import { ProductRouter } from "./endpoints/ProductRouter";
+import { FilesRouter } from "./endpoints/FilesRouter";
 
 ECSQLDatabase.init({
 	database: "subscribeto",
@@ -55,5 +57,7 @@ server.setAuthorizationMiddleware(async(req: ECSRequest): Promise<ECSRequest> =>
 
 server.use("/user", new UserRouter());
 server.use("/business", new BusinessRouter());
+server.use("/product", new ProductRouter());
+server.use("/files", new FilesRouter());
 
 server.startHTTP(3000);
