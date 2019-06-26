@@ -23,6 +23,7 @@
  */
 
 import { ECSQLObject } from "@elijahjcobb/nosql";
+import { Files } from "../files/Files";
 
 export interface ProductProps {
 	name: string;
@@ -39,6 +40,15 @@ export class Product extends ECSQLObject<ProductProps> {
 			description: "string",
 			businessId: "string"
 		});
+
+	}
+
+	public getJSON(): object {
+
+		let res: object & { image?: string | undefined } = super.toJSON();
+		res.image = Files.getUrl(this);
+
+		return res;
 
 	}
 

@@ -22,7 +22,10 @@
  *
  */
 
-import { ECSQLObject } from "@elijahjcobb/nosql";
+import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
+import { ECArray } from "@elijahjcobb/collections";
+import { Product, ProductProps } from "./Product";
+import { ECSError } from "@elijahjcobb/server";
 
 export interface BusinessProps {
 	name: string;
@@ -39,6 +42,23 @@ export class Business extends ECSQLObject<BusinessProps> {
 			lat: "number",
 			lng: "number"
 		});
+
+	}
+
+	public async getAllProducts(): Promise<ECArray<Product>> {
+
+		if (this.id === undefined) {
+			throw ECSError
+				.init()
+				.msg("You cannot get products for a business that hasn't been created.");
+		}
+
+		const query: ECSQLQuery<Product, ProductProps> = new ECSQLQuery(
+			Product,
+			new ECSQLFilter("businessId", ECSQLOperator.Equal, this.id)
+		);
+
+		return await query.getAllObjects();
 
 	}
 

@@ -39,6 +39,8 @@ import { Session } from "../session/Session";
 import { Product } from "../objects/Product";
 import { Files } from "../files/Files";
 import {ECSQLQuery} from "@elijahjcobb/nosql";
+import { Business } from "../objects/Business";
+import { ECArray } from "@elijahjcobb/collections";
 
 export class ProductRouter extends ECSRouter {
 
@@ -87,6 +89,75 @@ export class ProductRouter extends ECSRouter {
 
 	}
 
+	public async handleGetAllForBusiness(req: ECSRequest): Promise<ECSResponse> {
+
+		const businessId: string = req.getParameters().get("id") as string;
+		const business: Business = await ECSQLQuery.getObjectWithId(Business, businessId);
+		const products: ECArray<Product> = await business.getAllProducts();
+
+		return new ECSResponse(products.map((product: Product) => {
+
+			return product.getJSON();
+
+		}).toNativeArray());
+
+	}
+
+
+	public async handleUpdateName(req: ECSRequest): Promise<ECSResponse> {
+
+		const id: string = req.getParameters().get("id") as string;
+		const name: string = req.get("name");
+
+		const product: Product = await ECSQLQuery.getObjectWithId(Product, id);
+		product.props.name = name;
+		await product.updateProps("name");
+
+		return new ECSResponse(product.getJSON());
+
+	}
+
+	public async handleUpdateDescription(req: ECSRequest): Promise<ECSResponse> {
+
+		const id: string = req.getParameters().get("id") as string;
+		const description: string = req.get("description");
+
+		const product: Product = await ECSQLQuery.getObjectWithId(Product, id);
+		product.props.description = description;
+		await product.updateProps("description");
+
+		return new ECSResponse(product.getJSON());
+
+	}
+
+	public async handleUpdateImage(req: ECSRequest): Promise<ECSResponse> {
+
+		const id: string = req.getParameters().get("id") as string;
+		const encodedImage: string = req.get("image");
+
+		let imageData: Buffer;
+
+		try {
+
+			imageData = Buffer.from(encodedImage, "base64");
+
+		} catch (e) {
+
+			throw ECSError
+				.init()
+				.code(400)
+				.msg("The value for key 'image' must be a string that is base64 encoded binary data of an image.")
+				.show();
+
+		}
+
+		const product: Product = await ECSQLQuery.getObjectWithId(Product, id);
+		Files.saveFile(product, imageData);
+
+		return new ECSResponse(product.getJSON());
+
+	}
+
 	public getRouter(): Express.Router {
 
 		this.add(new ECSRoute(
@@ -107,8 +178,56 @@ export class ProductRouter extends ECSRouter {
 
 		this.add(new ECSRoute(
 			ECSRequestType.GET,
+			"/business/:id",
+			this.handleGetAllForBusiness
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.GET,
 			"/:id",
 			this.handleGet
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.PUT,
+			"/:id/name",
+			this.handleUpdateName,
+			new ECSValidator(
+				new ECSTypeValidator({
+					name: StandardType.STRING
+				}),
+				SessionValidator
+					.init()
+					.business()
+			)
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.PUT,
+			"/:id/description",
+			this.handleUpdateDescription,
+			new ECSValidator(
+				new ECSTypeValidator({
+					description: StandardType.STRING
+				}),
+				SessionValidator
+					.init()
+					.business()
+			)
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.PUT,
+			"/:id/image",
+			this.handleUpdateImage,
+			new ECSValidator(
+				new ECSTypeValidator({
+					image: StandardType.STRING
+				}),
+				SessionValidator
+					.init()
+					.business()
+			)
 		));
 
 		return this.createRouter();
