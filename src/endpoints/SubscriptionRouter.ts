@@ -93,7 +93,68 @@ export class SubscriptionRouter extends ECSRouter {
 
 	}
 
+
+	public async handleGetTemp(req: ECSRequest): Promise<ECSResponse> {
+
+		throw ECSError.init().code(501).show().msg("Will be implemented soon...");
+
+	}
+
 	public getRouter(): Express.Router {
+
+		this.routes.add(new ECSRoute(
+			ECSRequestType.GET,
+			"/user/:id",
+			this.handleGetTemp,
+			new ECSValidator(
+				undefined,
+				SessionValidator
+					.init()
+					.user()
+			)
+		));
+
+		this.routes.add(new ECSRoute(
+			ECSRequestType.GET,
+			"/business/:id",
+			this.handleGetTemp,
+			new ECSValidator(
+				undefined,
+				SessionValidator
+					.init()
+					.business()
+			)
+		));
+
+		this.routes.add(new ECSRoute(
+			ECSRequestType.GET,
+			"/program/:id",
+			this.handleGetTemp,
+			new ECSValidator(
+				undefined,
+				SessionValidator
+					.init()
+					.business()
+			)
+		));
+
+		this.routes.add(new ECSRoute(
+			ECSRequestType.GET,
+			"/product/:id",
+			this.handleGetTemp,
+			new ECSValidator(
+				undefined,
+				SessionValidator
+					.init()
+					.business()
+			)
+		));
+
+		this.routes.add(new ECSRoute(
+			ECSRequestType.POST,
+			"/:id",
+			this.handleGetTemp
+		));
 
 		this.routes.add(new ECSRoute(
 			ECSRequestType.POST,
