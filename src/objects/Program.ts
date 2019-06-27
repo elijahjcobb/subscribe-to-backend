@@ -49,16 +49,6 @@ export class Program extends ECSQLObject<ProgramProps> {
 
 	}
 
-
-	public getDeadDate(): number {
-
-		const now: number = Date.now();
-		const timeToAdd: number = 1000 * 60 * 60 * 24 * 7 * 4;
-
-		return now + timeToAdd;
-
-	}
-
 	public newProgramWithChangedPrice(price: number): Program {
 
 		let newProgram: Program = new Program();

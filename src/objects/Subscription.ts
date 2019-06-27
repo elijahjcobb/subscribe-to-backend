@@ -26,6 +26,7 @@ import { ECSQLObject } from "@elijahjcobb/nosql";
 
 export interface SubscriptionProps {
 	userId: string;
+	businessId: string;
 	programId: string;
 	autoRenew: boolean;
 }
@@ -36,6 +37,7 @@ export class Subscription extends ECSQLObject<SubscriptionProps> {
 
 		super("subscription", {
 			userId: "string",
+			businessId: "string",
 			programId: "string",
 			autoRenew: "boolean"
 		});
