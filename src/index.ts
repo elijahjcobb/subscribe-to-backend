@@ -57,6 +57,8 @@ if (process.env.USER === "elijahcobb") {
 		verbose: true
 	};
 
+	console.log(databaseConfig);
+
 	port = 80;
 
 }
