@@ -89,7 +89,7 @@ export class SubscriptionRouter extends ECSRouter {
 
 	public async handleRenew(req: ECSRequest): Promise<ECSResponse> {
 
-		return new ECSResponse({});
+		throw ECSError.init().code(501).show().msg("Will be implemented once StripeAPI is bridged.");
 
 	}
 
