@@ -31,6 +31,7 @@ import { ProductRouter } from "./endpoints/ProductRouter";
 import { FilesRouter } from "./endpoints/FilesRouter";
 import * as FileSystem from "fs";
 import { ProgramRouter } from "./endpoints/ProgramRouter";
+import { SubscriptionRouter } from "./endpoints/SubscriptionRouter";
 
 let databaseConfig: ECSQLInitObject;
 let port: number;
@@ -86,6 +87,7 @@ server.use("/user", new UserRouter());
 server.use("/business", new BusinessRouter());
 server.use("/product", new ProductRouter());
 server.use("/program", new ProgramRouter());
+server.use("/subscription", new SubscriptionRouter());
 server.use("/files", new FilesRouter());
 
 server.startHTTP(port);
