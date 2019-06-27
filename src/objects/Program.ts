@@ -22,17 +22,28 @@
  *
  */
 
-import { ECSQLObject } from "@elijahjcobb/nosql";
-import { ECTimeUnit } from "@elijahjcobb/prototypes";
+import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
+import { Subscription, SubscriptionProps } from "./Subscription";
+import { ECSError } from "@elijahjcobb/server";
+
+export enum ProgramTimeInterval {
+	Daily,
+	Weekly,
+	BiWeekly,
+	Monthly,
+	Quarterly,
+	Yearly
+}
 
 export interface ProgramProps {
 	businessId: string;
 	productId: string;
 	price: number;
-	priceInterval: ECTimeUnit;
+	priceInterval: ProgramTimeInterval;
 	allowance: number;
-	allowanceInterval: ECTimeUnit;
+	allowanceInterval: ProgramTimeInterval;
 	successorId: string;
+	closed: boolean;
 }
 
 export class Program extends ECSQLObject<ProgramProps> {
@@ -47,7 +58,59 @@ export class Program extends ECSQLObject<ProgramProps> {
 			allowance: "number",
 			allowanceInterval: "number",
 			successorId: "number",
+			closed: "boolean"
 		});
+
+	}
+
+	public newProgramWithChangedPrice(price: number, priceInterval: number): Program {
+
+		let newProgram: Program = new Program();
+
+		newProgram.props.businessId = this.props.businessId;
+		newProgram.props.productId = this.props.productId;
+		newProgram.props.allowance = this.props.allowance;
+		newProgram.props.allowanceInterval = this.props.allowanceInterval;
+		newProgram.props.successorId = this.props.successorId;
+		newProgram.props.price = price;
+		newProgram.props.priceInterval = priceInterval;
+
+		return newProgram;
+
+	}
+
+	public newProgramWithChangedAllowance(allowance: number, allowanceInterval: number): Program {
+
+		let newProgram: Program = new Program();
+
+		newProgram.props.businessId = this.props.businessId;
+		newProgram.props.productId = this.props.productId;
+		newProgram.props.successorId = this.props.successorId;
+		newProgram.props.price = this.props.price;
+		newProgram.props.priceInterval = this.props.priceInterval;
+		newProgram.props.allowance = allowance;
+		newProgram.props.allowanceInterval = allowanceInterval;
+
+		return newProgram;
+
+	}
+
+	public async countSubscribers(): Promise<number> {
+
+		if (this.id === undefined) return 0;
+
+		const query: ECSQLQuery<Subscription, SubscriptionProps> = new ECSQLQuery(
+			Subscription,
+			new ECSQLFilter("programId", ECSQLOperator.Equal, this.id)
+		);
+
+		return await query.count();
+
+	}
+
+	public async hasSubscribers(): Promise<boolean> {
+
+		return (await this.countSubscribers()) > 0;
 
 	}
 

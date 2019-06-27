@@ -30,6 +30,7 @@ import { BusinessRouter } from "./endpoints/BusinessRouter";
 import { ProductRouter } from "./endpoints/ProductRouter";
 import { FilesRouter } from "./endpoints/FilesRouter";
 import * as FileSystem from "fs";
+import { ProgramRouter } from "./endpoints/ProgramRouter";
 
 let databaseConfig: ECSQLInitObject;
 let port: number;
@@ -84,6 +85,7 @@ server.setAuthorizationMiddleware(async(req: ECSRequest): Promise<ECSRequest> =>
 server.use("/user", new UserRouter());
 server.use("/business", new BusinessRouter());
 server.use("/product", new ProductRouter());
+server.use("/program", new ProgramRouter());
 server.use("/files", new FilesRouter());
 
 server.startHTTP(port);

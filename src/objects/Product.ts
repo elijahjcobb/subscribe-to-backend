@@ -22,8 +22,11 @@
  *
  */
 
-import { ECSQLObject } from "@elijahjcobb/nosql";
+import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
 import { Files } from "../files/Files";
+import { ECArray } from "@elijahjcobb/collections";
+import { Program, ProgramProps } from "./Program";
+import { ECSError } from "@elijahjcobb/server";
 
 export interface ProductProps {
 	name: string;
@@ -49,6 +52,23 @@ export class Product extends ECSQLObject<ProductProps> {
 		res.image = Files.getUrl(this);
 
 		return res;
+
+	}
+
+	public async getAllPrograms(): Promise<ECArray<Program>> {
+
+		if (this.id === undefined) {
+			throw ECSError
+				.init()
+				.msg("You cannot get programs for a product that hasn't been created.");
+		}
+
+		const query: ECSQLQuery<Program, ProgramProps> = new ECSQLQuery(
+			Program,
+			new ECSQLFilter("productId", ECSQLOperator.Equal, this.id)
+		);
+
+		return await query.getAllObjects();
 
 	}
 

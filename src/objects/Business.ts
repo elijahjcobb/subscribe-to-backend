@@ -22,10 +22,18 @@
  *
  */
 
-import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
+import {
+	ECSQLCondition,
+	ECSQLFilter,
+	ECSQLFilterGroup,
+	ECSQLObject,
+	ECSQLOperator,
+	ECSQLQuery
+} from "@elijahjcobb/nosql";
 import { ECArray } from "@elijahjcobb/collections";
 import { Product, ProductProps } from "./Product";
 import { ECSError } from "@elijahjcobb/server";
+import { Program, ProgramProps } from "./Program";
 
 export interface BusinessProps {
 	name: string;
@@ -56,6 +64,44 @@ export class Business extends ECSQLObject<BusinessProps> {
 		const query: ECSQLQuery<Product, ProductProps> = new ECSQLQuery(
 			Product,
 			new ECSQLFilter("businessId", ECSQLOperator.Equal, this.id)
+		);
+
+		return await query.getAllObjects();
+
+	}
+
+	public async getAllPrograms(): Promise<ECArray<Program>> {
+
+		if (this.id === undefined) {
+			throw ECSError
+				.init()
+				.msg("You cannot get programs for a business that hasn't been created.");
+		}
+
+		const query: ECSQLQuery<Program, ProgramProps> = new ECSQLQuery(
+			Program,
+			new ECSQLFilter("businessId", ECSQLOperator.Equal, this.id)
+		);
+
+		return await query.getAllObjects();
+
+	}
+
+	public async getPrograms(closed: boolean = false): Promise<ECArray<Program>> {
+
+		if (this.id === undefined) {
+			throw ECSError
+				.init()
+				.msg("You cannot get programs for a business that hasn't been created.");
+		}
+
+		const query: ECSQLQuery<Program, ProgramProps> = new ECSQLQuery(
+			Program,
+			new ECSQLFilterGroup(
+				ECSQLCondition.And,
+				new ECSQLFilter("businessId", ECSQLOperator.Equal, this.id),
+				new ECSQLFilter("closed", ECSQLOperator.Equal, closed)
+			)
 		);
 
 		return await query.getAllObjects();
