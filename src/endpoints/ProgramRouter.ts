@@ -39,7 +39,7 @@ import { Session } from "../session/Session";
 import { Business } from "../objects/Business";
 import { Product } from "../objects/Product";
 import { ECSQLQuery } from "@elijahjcobb/nosql";
-import { Program, ProgramTimeInterval } from "../objects/Program";
+import { Program } from "../objects/Program";
 import { ECArray } from "@elijahjcobb/collections";
 
 export class ProgramRouter extends ECSRouter {
@@ -49,26 +49,7 @@ export class ProgramRouter extends ECSRouter {
 		const session: Session = req.getSession();
 		const productId: string = req.get("productId");
 		const price: number = req.get("price");
-		const priceInterval: ProgramTimeInterval = req.get("priceInterval");
 		const allowance: number = req.get("allowance");
-		const allowanceInterval: ProgramTimeInterval = req.get("allowanceInterval");
-
-		if (priceInterval > ProgramTimeInterval.Yearly || priceInterval < ProgramTimeInterval.Daily) {
-			throw ECSError
-				.init()
-				.msg(`Price interval '${priceInterval}' is not valid.`)
-				.code(400)
-				.show();
-		}
-
-		if (allowanceInterval > ProgramTimeInterval.Yearly || allowanceInterval < ProgramTimeInterval.Daily) {
-			throw ECSError
-				.init()
-				.msg(`Allowance interval '${allowanceInterval}' is not valid.`)
-				.code(400)
-				.show();
-		}
-
 		const business: Business = await session.getBusiness();
 		const product: Product = await ECSQLQuery.getObjectWithId(Product, productId);
 
@@ -77,9 +58,7 @@ export class ProgramRouter extends ECSRouter {
 		program.props.businessId = business.id;
 		program.props.price = price;
 		program.props.closed = false;
-		program.props.priceInterval = priceInterval;
 		program.props.allowance = allowance;
-		program.props.allowanceInterval = allowanceInterval;
 		await program.create();
 
 		return new ECSResponse(program.getJSON());
@@ -158,14 +137,6 @@ export class ProgramRouter extends ECSRouter {
 		const oldProgram: Program = await ECSQLQuery.getObjectWithId(Program, oldProgramId);
 
 		const price: number = req.get("value");
-		const priceInterval: ProgramTimeInterval = req.get("interval");
-		if (priceInterval > ProgramTimeInterval.Yearly || priceInterval < ProgramTimeInterval.Daily) {
-			throw ECSError
-				.init()
-				.show()
-				.msg("Invalid interval.")
-				.code(400);
-		}
 		if (price <= 0) {
 			throw ECSError
 				.init()
@@ -176,7 +147,7 @@ export class ProgramRouter extends ECSRouter {
 
 		if (await oldProgram.hasSubscribers()) {
 
-			let newProgram: Program = oldProgram.newProgramWithChangedPrice(price, priceInterval);
+			let newProgram: Program = oldProgram.newProgramWithChangedPrice(price);
 			await newProgram.create();
 
 			oldProgram.props.successorId = newProgram.id;
@@ -189,10 +160,9 @@ export class ProgramRouter extends ECSRouter {
 
 		} else {
 
-			oldProgram.props.priceInterval = priceInterval;
 			oldProgram.props.price = price;
 
-			await oldProgram.updateProps("price", "priceInterval");
+			await oldProgram.updateProps("price");
 
 			return new ECSResponse(oldProgram.getJSON());
 
@@ -206,14 +176,7 @@ export class ProgramRouter extends ECSRouter {
 		const oldProgram: Program = await ECSQLQuery.getObjectWithId(Program, oldProgramId);
 
 		const allowance: number = req.get("value");
-		const allowanceInterval: ProgramTimeInterval = req.get("interval");
-		if (allowanceInterval > ProgramTimeInterval.Yearly || allowanceInterval < ProgramTimeInterval.Daily) {
-			throw ECSError
-				.init()
-				.show()
-				.msg("Invalid interval.")
-				.code(400);
-		}
+
 		if (allowance <= 0) {
 			throw ECSError
 				.init()
@@ -224,7 +187,7 @@ export class ProgramRouter extends ECSRouter {
 
 		if (await oldProgram.hasSubscribers()) {
 
-			let newProgram: Program = oldProgram.newProgramWithChangedAllowance(allowance, allowanceInterval);
+			let newProgram: Program = oldProgram.newProgramWithChangedAllowance(allowance);
 			await newProgram.create();
 
 			oldProgram.props.successorId = newProgram.id;
@@ -237,10 +200,9 @@ export class ProgramRouter extends ECSRouter {
 
 		} else {
 
-			oldProgram.props.priceInterval = allowanceInterval;
 			oldProgram.props.price = allowance;
 
-			await oldProgram.updateProps("allowance", "allowanceInterval");
+			await oldProgram.updateProps("allowance");
 
 			return new ECSResponse(oldProgram.getJSON());
 
@@ -271,9 +233,7 @@ export class ProgramRouter extends ECSRouter {
 				new ECSTypeValidator({
 					productId: StandardType.STRING,
 					price: StandardType.NUMBER,
-					priceInterval: StandardType.NUMBER,
-					allowance: StandardType.NUMBER,
-					allowanceInterval: StandardType.NUMBER
+					allowance: StandardType.NUMBER
 				}),
 				SessionValidator.init().business()
 			)
@@ -325,8 +285,7 @@ export class ProgramRouter extends ECSRouter {
 			this.handleUpdatePrice,
 			new ECSValidator(
 				new ECSTypeValidator({
-					value: StandardType.NUMBER,
-					interval: StandardType.NUMBER
+					value: StandardType.NUMBER
 				}),
 				SessionValidator.init().business()
 			)
@@ -338,8 +297,7 @@ export class ProgramRouter extends ECSRouter {
 			this.handleUpdateAllowance,
 			new ECSValidator(
 				new ECSTypeValidator({
-					value: StandardType.NUMBER,
-					interval: StandardType.NUMBER
+					value: StandardType.NUMBER
 				}),
 				SessionValidator.init().business()
 			)

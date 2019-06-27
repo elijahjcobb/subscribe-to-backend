@@ -24,24 +24,12 @@
 
 import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
 import { Subscription, SubscriptionProps } from "./Subscription";
-import { ECSError } from "@elijahjcobb/server";
-
-export enum ProgramTimeInterval {
-	Daily,
-	Weekly,
-	BiWeekly,
-	Monthly,
-	Quarterly,
-	Yearly
-}
 
 export interface ProgramProps {
 	businessId: string;
 	productId: string;
 	price: number;
-	priceInterval: ProgramTimeInterval;
 	allowance: number;
-	allowanceInterval: ProgramTimeInterval;
 	successorId: string;
 	closed: boolean;
 }
@@ -54,32 +42,38 @@ export class Program extends ECSQLObject<ProgramProps> {
 			businessId: "string",
 			productId: "string",
 			price: "number",
-			priceInterval: "number",
 			allowance: "number",
-			allowanceInterval: "number",
 			successorId: "number",
 			closed: "boolean"
 		});
 
 	}
 
-	public newProgramWithChangedPrice(price: number, priceInterval: number): Program {
+
+	public getDeadDate(): number {
+
+		const now: number = Date.now();
+		const timeToAdd: number = 1000 * 60 * 60 * 24 * 7 * 4;
+
+		return now + timeToAdd;
+
+	}
+
+	public newProgramWithChangedPrice(price: number): Program {
 
 		let newProgram: Program = new Program();
 
 		newProgram.props.businessId = this.props.businessId;
 		newProgram.props.productId = this.props.productId;
 		newProgram.props.allowance = this.props.allowance;
-		newProgram.props.allowanceInterval = this.props.allowanceInterval;
 		newProgram.props.successorId = this.props.successorId;
 		newProgram.props.price = price;
-		newProgram.props.priceInterval = priceInterval;
 
 		return newProgram;
 
 	}
 
-	public newProgramWithChangedAllowance(allowance: number, allowanceInterval: number): Program {
+	public newProgramWithChangedAllowance(allowance: number): Program {
 
 		let newProgram: Program = new Program();
 
@@ -87,9 +81,7 @@ export class Program extends ECSQLObject<ProgramProps> {
 		newProgram.props.productId = this.props.productId;
 		newProgram.props.successorId = this.props.successorId;
 		newProgram.props.price = this.props.price;
-		newProgram.props.priceInterval = this.props.priceInterval;
 		newProgram.props.allowance = allowance;
-		newProgram.props.allowanceInterval = allowanceInterval;
 
 		return newProgram;
 
