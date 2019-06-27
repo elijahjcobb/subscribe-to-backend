@@ -51,7 +51,7 @@ if (process.env.USER === "elijahcobb") {
 
 	databaseConfig = {
 		database: "subscribeto",
-		password: FileSystem.readFileSync("/root/databasepassword.txt").toString("utf8"),
+		password: FileSystem.readFileSync("/root/databasepassword.txt").toString("utf8").replace("\n", ""),
 		port: 3306,
 		username: "root",
 		verbose: true
