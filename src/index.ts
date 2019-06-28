@@ -53,7 +53,7 @@ if (process.env.USER === "elijahcobb") {
 		port: 3306,
 		username: "root",
 		verbose: true,
-		insecureAuth: true
+		insecureAuth: false
 	};
 
 	console.log(databaseConfig);
