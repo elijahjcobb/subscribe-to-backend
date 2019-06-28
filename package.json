@@ -4,13 +4,13 @@
 		"compile": "npm run clean && /usr/local/bin/tsc -p tsconfig.json",
 		"clean": "rm -rf dist",
 		"prod": "npm run compile && /usr/bin/node dist/index.js"
-	}, 
+	},
 	"dependencies": {
 		"@elijahjcobb/collections": "latest",
 		"@elijahjcobb/encryption": "latest",
 		"@elijahjcobb/error": "latest",
 		"@elijahjcobb/geo": "latest",
-		"@elijahjcobb/nosql": "latest",
+		"@elijahjcobb/nosql": "0.0.14",
 		"@elijahjcobb/prototypes": "latest",
 		"@elijahjcobb/request": "latest",
 		"@elijahjcobb/server": "latest",

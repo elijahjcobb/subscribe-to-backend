@@ -54,7 +54,8 @@ if (process.env.USER === "elijahcobb") {
 		password: FileSystem.readFileSync("/root/databasepassword.txt").toString("utf8").replace("\n", ""),
 		port: 3306,
 		username: "root",
-		verbose: true
+		verbose: true,
+		insecureAuth: true
 	};
 
 	console.log(databaseConfig);
