@@ -47,8 +47,6 @@ if (process.env.USER === "elijahcobb") {
 
 } else {
 
-	console.log(FileSystem.readFileSync("/root/databasepassword.txt").toString("utf8"));
-
 	databaseConfig = {
 		database: "subscribeto",
 		password: FileSystem.readFileSync("/root/databasepassword.txt").toString("utf8").replace("\n", ""),
