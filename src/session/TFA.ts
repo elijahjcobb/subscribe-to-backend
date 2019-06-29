@@ -21,3 +21,73 @@
  * OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  */
+
+import { ECGenerator } from "@elijahjcobb/encryption";
+import {ECSError} from "@elijahjcobb/server";
+import {Encryption} from "./Encryption";
+
+export type TFATokenObject = { userId: string; code: string; };
+
+export class TFAToken {
+
+	public code: string;
+	public userId: string;
+
+	public constructor(userId: string) {
+
+		this.userId = userId;
+		this.code = ECGenerator.randomCode();
+
+	}
+
+	public encrypt(): string {
+
+		const tokenObject: TFATokenObject = {
+			code: this.code,
+			userId: this.userId
+		};
+
+		try {
+
+			const tokenString: string = JSON.stringify(tokenObject);
+			const tokenData: Buffer = Buffer.from(tokenString, "utf8");
+			const encryptedTokenData: Buffer = Encryption.encrypt(tokenData);
+			return encryptedTokenData.toString("hex");
+
+		} catch (e) {
+
+			throw ECSError.init().msg("Failed to encrypt TFAToken.");
+
+		}
+
+	}
+
+	public static decrypt(token: string): TFAToken {
+
+		try {
+
+			const encryptedTokenData: Buffer = Buffer.from(token, "hex");
+			const decryptedTokenData: Buffer = Encryption.decrypt(encryptedTokenData);
+			const tokenString: string = decryptedTokenData.toString("utf8");
+			const tokenObject: TFATokenObject = JSON.parse(tokenString) as TFATokenObject;
+
+			let newToken: TFAToken = new TFAToken(tokenObject.userId);
+			newToken.code = tokenObject.code;
+
+			return newToken;
+
+		} catch (e) {
+
+			throw ECSError.init().msg("Failed to decrypt TFAToken.");
+
+		}
+
+	}
+
+}
+
+export abstract class TFA {
+
+
+
+}
