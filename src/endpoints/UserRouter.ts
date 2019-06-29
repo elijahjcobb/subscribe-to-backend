@@ -167,7 +167,7 @@ export class UserRouter extends ECSRouter {
 
 		} catch (e) {
 
-			throw ECSError.init()
+			throw ECSError.init().msg("Invalid password or key.").code(401).show();
 
 		}
 

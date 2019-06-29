@@ -133,12 +133,6 @@ export class User extends ECSQLObject<UserProps> {
 
 	public getTOTPCode(): string {
 
-		if (!this.usesTOTP()) {
-			throw ECSError
-				.init()
-				.msg("This user does not use 2FA but you tried to generate a code from them.");
-		}
-
 		return TOTP.generateCode(this.props.totpSecret as string);
 
 	}
