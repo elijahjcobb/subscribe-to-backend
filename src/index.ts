@@ -40,17 +40,35 @@ let port: number;
 
 if (process.env.USER === "elijahcobb") {
 
-	console.log("Running local environment.");
+	if (process.platform === "darwin") {
 
-	databaseConfig = {
-		database: "subscribeto",
-		password: "alpine",
-		verbose: true
-	};
+		console.log("Running local environment (Elijah's Laptop).");
 
-	Encryption.init(FileSystem.readFileSync("/home/elijahcobb/s2.enc"));
+		databaseConfig = {
+			database: "subscribeto",
+			password: "alpine",
+			verbose: true
+		};
 
-	port = 3000;
+		Encryption.init(FileSystem.readFileSync("/Users/elijahcobb/.s2.enc"));
+
+		port = 3000;
+
+	} else {
+
+		console.log("Running local environment (Elijah's Desktop).");
+
+		databaseConfig = {
+			database: "subscribeto",
+			password: "alpine",
+			verbose: true
+		};
+
+		Encryption.init(FileSystem.readFileSync("/home/elijahcobb/.s2.enc"));
+
+		port = 3000;
+
+	}
 
 } else {
 
