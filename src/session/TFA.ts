@@ -47,6 +47,8 @@ export class TFAToken {
 			userId: this.userId
 		};
 
+		console.log(`Simulated TFA SMS Message: '${this.code}' for user with id '${this.userId}'.`);
+
 		try {
 
 			const tokenString: string = JSON.stringify(tokenObject);
@@ -59,6 +61,12 @@ export class TFAToken {
 			throw ECSError.init().msg("Failed to encrypt TFAToken.");
 
 		}
+
+	}
+
+	public isCodeValid(code: string): boolean {
+
+		return this.code !== undefined && this.code === code;
 
 	}
 
@@ -81,6 +89,14 @@ export class TFAToken {
 			throw ECSError.init().msg("Failed to decrypt TFAToken.");
 
 		}
+
+	}
+
+	public static isCodeValid(code: string, token: string): boolean {
+
+		const tokenObject: TFAToken = TFAToken.decrypt(token);
+
+		return tokenObject.isCodeValid(code);
 
 	}
 
