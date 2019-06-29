@@ -40,8 +40,10 @@ import {SessionValidator} from "../session/SessionValidator";
 import {BusinessOwner} from "../objects/BusinessOwner";
 import {Business} from "../objects/Business";
 import {ECSQLQuery} from "@elijahjcobb/nosql";
-import { TOTP} from "../session/TOTP";
-import { ECCipher } from "@elijahjcobb/encryption";
+import {TOTP} from "../session/TOTP";
+import {ECCipher} from "@elijahjcobb/encryption";
+import {TFA, TFAToken} from "../session/TFA";
+import {Encryption} from "../session/Encryption";
 
 export class UserRouter extends ECSRouter {
 
@@ -118,7 +120,7 @@ export class UserRouter extends ECSRouter {
 
 		const user: User = await User.signIn(email, password);
 
-		if (user.usesTOTP()) {
+		if (user.usesTFATOTP()) {
 
 			let key: string;
 
@@ -126,8 +128,7 @@ export class UserRouter extends ECSRouter {
 
 				const id: string = user.id as string;
 				const idData: Buffer = Buffer.from(id, "utf8");
-				const passwordData: Buffer = Buffer.from(password, "utf8");
-				const encryptedId: Buffer = new ECCipher(passwordData).encrypt(idData);
+				const encryptedId: Buffer = Encryption.encrypt(idData);
 				key = encryptedId.toString("hex");
 
 			} catch (e) {
@@ -136,15 +137,23 @@ export class UserRouter extends ECSRouter {
 
 			}
 
-			return new ECSResponse({ key });
+			return new ECSResponse({ key, mode: "totp" });
 
 		} else {
 
-			const session: Session = await user.getNewSession();
+			if (user.usesTFASMS()) {
 
-			return new ECSResponse({
-				sessionId: session.id
-			});
+				return new ECSResponse({ token: new TFAToken(user.id as string).encrypt(), mode: "sms" });
+
+			} else {
+
+				const session: Session = await user.getNewSession();
+
+				return new ECSResponse({
+					sessionId: session.id
+				});
+
+			}
 
 		}
 
@@ -154,15 +163,13 @@ export class UserRouter extends ECSRouter {
 
 		const key: string = req.get("key");
 		const code: string = req.get("code");
-		const password: string = req.get("password");
 
 		let id: string;
 
 		try {
 
-			const passwordData: Buffer = Buffer.from(password, "utf8");
 			const keyData: Buffer = Buffer.from(key, "hex");
-			const idData: Buffer = new ECCipher(passwordData).decrypt(keyData);
+			const idData: Buffer = Encryption.decrypt(keyData);
 			id = idData.toString("utf8");
 
 		} catch (e) {
@@ -173,7 +180,7 @@ export class UserRouter extends ECSRouter {
 
 		const user: User = await ECSQLQuery.getObjectWithId(User, id);
 
-		if (!user.usesTOTP()) {
+		if (!user.usesTFATOTP()) {
 			throw ECSError
 				.init()
 				.msg("You do not have TOTP enabled.")
@@ -189,6 +196,27 @@ export class UserRouter extends ECSRouter {
 				.show();
 		}
 
+		const session: Session = await user.getNewSession();
+
+		return new ECSResponse({ sessionId: session.id });
+
+	}
+
+	public async handleSignInSMS(req: ECSRequest): Promise<ECSResponse> {
+
+		const encryptedToken: string = req.get("token");
+		const code: string = req.get("code");
+		const token: TFAToken = TFAToken.decrypt(encryptedToken);
+
+		if (!token.isCodeValid(code)) {
+			throw ECSError
+				.init()
+				.msg("Incorrect code, try again.")
+				.code(401)
+				.show();
+		}
+
+		const user: User = await ECSQLQuery.getObjectWithId(User, token.userId);
 		const session: Session = await user.getNewSession();
 
 		return new ECSResponse({ sessionId: session.id });
@@ -320,7 +348,88 @@ export class UserRouter extends ECSRouter {
 
 	}
 
+	public async handleToggleSMSTFA(req: ECSRequest): Promise<ECSResponse> {
+
+		const session: Session = req.getSession();
+		const user: User = await session.getUser();
+		const enable: boolean = req.get("enable");
+		const password: string = req.get("password");
+
+		if (!user.passwordIsCorrect(password)) {
+			throw ECSError
+				.init()
+				.code(401)
+				.msg("Incorrect password.")
+				.show();
+		}
+
+		if (enable) {
+
+			return new ECSResponse({ token: new TFAToken(user.id as string).encrypt() });
+
+		} else {
+
+			user.props.tfaSMSEnabled = false;
+			await user.updateProps("tfaSMSEnabled");
+			return new ECSResponse({});
+
+		}
+
+	}
+
+	public async handleFinalizeSMSTFA(req: ECSRequest): Promise<ECSResponse> {
+
+		const session: Session = req.getSession();
+		const user: User = await session.getUser();
+		const code: string = req.get("code");
+		const encryptedToken: string = req.get("token");
+		const isValid: boolean = TFAToken.isCodeValid(code, encryptedToken);
+
+		if (!isValid) {
+			throw ECSError
+				.init()
+				.code(401)
+				.msg("The code provided was incorrect.");
+		}
+
+		user.props.tfaSMSEnabled = true;
+		await user.updateProps("tfaSMSEnabled");
+
+		return new ECSResponse({});
+
+	}
+
 	public getRouter(): Express.Router {
+
+		this.add(new ECSRoute(
+			ECSRequestType.PUT,
+			"/me/tfaSMS/",
+			this.handleToggleSMSTFA,
+			new ECSValidator(
+				new ECSTypeValidator({
+					enable: StandardType.BOOLEAN,
+					password: StandardType.STRING
+				}),
+				SessionValidator
+					.init()
+					.user()
+			)
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.POST,
+			"/me/tfaSMS/finalize",
+			this.handleFinalizeSMSTFA,
+			new ECSValidator(
+				new ECSTypeValidator({
+					code: StandardType.STRING,
+					token: StandardType.STRING
+				}),
+				SessionValidator
+					.init()
+					.user()
+			)
+		));
 
 		this.add(new ECSRoute(
 			ECSRequestType.PUT,
@@ -510,9 +619,20 @@ export class UserRouter extends ECSRouter {
 			this.handleSignInTOTP,
 			new ECSValidator(
 				new ECSTypeValidator({
-					password: StandardType.STRING,
 					code: StandardType.STRING,
 					key: StandardType.STRING
+				})
+			)
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.POST,
+			"/sign-in/sms",
+			this.handleSignInSMS,
+			new ECSValidator(
+				new ECSTypeValidator({
+					code: StandardType.STRING,
+					token: StandardType.STRING
 				})
 			)
 		));

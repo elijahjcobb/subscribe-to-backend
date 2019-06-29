@@ -120,7 +120,13 @@ export class User extends ECSQLObject<UserProps> {
 
 	}
 
-	public usesTOTP(): boolean {
+	public usesTFASMS(): boolean {
+
+		return this.props.tfaSMSEnabled !== undefined && this.props.tfaSMSEnabled;
+
+	}
+
+	public usesTFATOTP(): boolean {
 
 		return this.props.tfaTOTPEnabled !== undefined && this.props.tfaTOTPEnabled;
 
