@@ -24,7 +24,7 @@
 
 import { ECSQLDatabase, ECSQLQuery, ECSQLInitObject } from "@elijahjcobb/nosql";
 import { ECSRequest, ECSServer } from "@elijahjcobb/server";
-import { UserRouter } from "./endpoints/UserRouter";
+import { UserRouter } from "./endpoints/User/UserRouter";
 import { Session } from "./session/Session";
 import { BusinessRouter } from "./endpoints/BusinessRouter";
 import { ProductRouter } from "./endpoints/ProductRouter";
