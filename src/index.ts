@@ -33,6 +33,7 @@ import * as FileSystem from "fs";
 import { ProgramRouter } from "./endpoints/ProgramRouter";
 import { SubscriptionRouter } from "./endpoints/SubscriptionRouter";
 import {TOTP} from "./session/TOTP";
+import { Encryption } from "./session/Encryption";
 
 let databaseConfig: ECSQLInitObject;
 let port: number;
@@ -46,6 +47,8 @@ if (process.env.USER === "elijahcobb") {
 		password: "alpine",
 		verbose: true
 	};
+
+	Encryption.init(FileSystem.readFileSync("/home/elijahcobb/s2.enc"));
 
 	port = 3000;
 
