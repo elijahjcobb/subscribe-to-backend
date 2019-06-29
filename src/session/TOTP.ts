@@ -22,19 +22,19 @@
  *
  */
 
-import * as TOTP from "otplib";
+import * as OTPLIB from "otplib";
 
-export abstract class TFA {
+export abstract class TOTP {
 
 	public static generateSecret(): string {
 
-		return TOTP.authenticator.generateSecret();
+		return OTPLIB.authenticator.generateSecret();
 
 	}
 
 	public static generateCode(secret: string): string {
 
-		return TOTP.authenticator.generate(secret);
+		return OTPLIB.authenticator.generate(secret);
 
 	}
 
@@ -42,7 +42,7 @@ export abstract class TFA {
 
 		try {
 
-			return TOTP.authenticator.check(code, secret);
+			return OTPLIB.authenticator.check(code, secret);
 
 		} catch (err) {
 

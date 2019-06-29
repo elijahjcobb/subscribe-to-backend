@@ -32,20 +32,26 @@ import { FilesRouter } from "./endpoints/FilesRouter";
 import * as FileSystem from "fs";
 import { ProgramRouter } from "./endpoints/ProgramRouter";
 import { SubscriptionRouter } from "./endpoints/SubscriptionRouter";
+import {TOTP} from "./session/TOTP";
 
 let databaseConfig: ECSQLInitObject;
 let port: number;
 
 if (process.env.USER === "elijahcobb") {
 
+	console.log("Running local environment.");
+
 	databaseConfig = {
 		database: "subscribeto",
+		password: "alpine",
 		verbose: true
 	};
 
 	port = 3000;
 
 } else {
+
+	console.log("Running production environment.");
 
 	databaseConfig = {
 		database: "subscribeto",
@@ -55,8 +61,6 @@ if (process.env.USER === "elijahcobb") {
 		verbose: true,
 		insecureAuth: false
 	};
-
-	console.log(databaseConfig);
 
 	port = 80;
 

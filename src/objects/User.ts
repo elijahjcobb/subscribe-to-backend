@@ -31,6 +31,9 @@ import {
 import { ECErrorOriginType, ECErrorStack, ECErrorType } from "@elijahjcobb/error";
 import { ECGenerator, ECHash } from "@elijahjcobb/encryption";
 import { Session } from "../session/Session";
+import {ECSQLFilteredJSON} from "@elijahjcobb/nosql/dist/object/ECSQLObject";
+import {TOTP} from "../session/TOTP";
+import {ECSError} from "@elijahjcobb/server";
 
 export enum UserGender {
 	Male,
@@ -51,6 +54,8 @@ export interface UserProps extends TestUser {
 	birthday: string;
 	salt: Buffer;
 	pepper: Buffer;
+	totpSecret: string;
+	totpEnabled: boolean;
 }
 
 export class User extends ECSQLObject<UserProps> {
@@ -65,14 +70,16 @@ export class User extends ECSQLObject<UserProps> {
 			gender: "number",
 			birthday: "string",
 			salt: "buffer",
-			pepper: "buffer"
+			pepper: "buffer",
+			totpEnabled: "boolean",
+			totpSecret: "string"
 		});
 
 	}
 
 	public getJSON(): object {
 
-		return this.getFilteredJSON(
+		let obj: ECSQLFilteredJSON<UserProps> = this.getFilteredJSON(
 			"id",
 			"email",
 			"firstName",
@@ -83,6 +90,19 @@ export class User extends ECSQLObject<UserProps> {
 			"updatedAt",
 			"createdAt"
 		);
+
+		if (this.props.birthday) {
+
+			// @ts-ignore
+			obj.birthday = {
+				month: parseInt(this.props.birthday.substr(0, 2)),
+				day: parseInt(this.props.birthday.substr(2, 2)),
+				year: parseInt(this.props.birthday.substr(4, 4))
+			};
+
+		}
+
+		return obj;
 
 	}
 
@@ -102,6 +122,31 @@ export class User extends ECSQLObject<UserProps> {
 		console.log(`toit toit so session has id: ${session.id}`);
 
 		return session;
+
+	}
+
+	public usesTOTP(): boolean {
+
+		return this.props.totpEnabled !== undefined && this.props.totpEnabled;
+
+	}
+
+	public getTOTPCode(): string {
+
+		if (!this.usesTOTP()) {
+			throw ECSError
+				.init()
+				.msg("This user does not use 2FA but you tried to generate a code from them.");
+		}
+
+		return TOTP.generateCode(this.props.totpSecret as string);
+
+	}
+
+	public passwordIsCorrect(password: string): boolean {
+
+		if (this.props.salt === undefined || this.props.pepper === undefined) return false;
+		return this.props.pepper.equals(User.createPepper(this.props.salt, password));
 
 	}
 
