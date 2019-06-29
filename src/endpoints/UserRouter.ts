@@ -276,15 +276,15 @@ export class UserRouter extends ECSRouter {
 				.show();
 		}
 
-		user.props.totpEnabled = false;
+		user.props.tfaTOTPEnabled = false;
 
-		if (enable) user.props.totpSecret = TOTP.generateSecret();
-		else user.props.totpSecret = undefined;
+		if (enable) user.props.tfaTOTPSecret = TOTP.generateSecret();
+		else user.props.tfaTOTPSecret = undefined;
 
 		await user.update();
 
 		return new ECSResponse({
-			secret: user.props.totpSecret
+			secret: user.props.tfaTOTPSecret
 		});
 
 	}
@@ -294,7 +294,7 @@ export class UserRouter extends ECSRouter {
 		const session: Session = req.getSession();
 		let user: User = await session.getUser();
 
-		if (user.props.totpSecret === undefined) {
+		if (user.props.tfaTOTPSecret === undefined) {
 			throw ECSError
 				.init()
 				.msg("You must call /user/me/totp first.")
@@ -313,8 +313,8 @@ export class UserRouter extends ECSRouter {
 				.show();
 		}
 
-		user.props.totpEnabled = true;
-		await user.updateProps("totpEnabled");
+		user.props.tfaTOTPEnabled = true;
+		await user.updateProps("tfaTOTPEnabled");
 
 		return new ECSResponse({});
 

@@ -54,8 +54,9 @@ export interface UserProps extends TestUser {
 	birthday: string;
 	salt: Buffer;
 	pepper: Buffer;
-	totpSecret: string;
-	totpEnabled: boolean;
+	tfaTOTPSecret: string;
+	tfaTOTPEnabled: boolean;
+	tfaSMSEnabled: boolean;
 }
 
 export class User extends ECSQLObject<UserProps> {
@@ -71,8 +72,9 @@ export class User extends ECSQLObject<UserProps> {
 			birthday: "string",
 			salt: "buffer",
 			pepper: "buffer",
-			totpEnabled: "boolean",
-			totpSecret: "string"
+			tfaTOTPEnabled: "boolean",
+			tfaTOTPSecret: "string",
+			tfaSMSEnabled: "boolean"
 		});
 
 	}
@@ -120,13 +122,13 @@ export class User extends ECSQLObject<UserProps> {
 
 	public usesTOTP(): boolean {
 
-		return this.props.totpEnabled !== undefined && this.props.totpEnabled;
+		return this.props.tfaTOTPEnabled !== undefined && this.props.tfaTOTPEnabled;
 
 	}
 
 	public getTOTPCode(): string {
 
-		return TOTP.generateCode(this.props.totpSecret as string);
+		return TOTP.generateCode(this.props.tfaTOTPSecret as string);
 
 	}
 
