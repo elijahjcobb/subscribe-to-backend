@@ -52,7 +52,8 @@ export class UserAuthRouter extends ECSRouter {
 		const session: Session = await user.getNewSession();
 
 		return new ECSResponse({
-			sessionId: session.id
+			token: session.id,
+			type: "session"
 		});
 
 	}
@@ -81,20 +82,27 @@ export class UserAuthRouter extends ECSRouter {
 
 			}
 
-			return new ECSResponse({ key, mode: "totp" });
+			return new ECSResponse({ token: key, type: "totp" });
 
 		} else {
 
 			if (user.usesTFASMS()) {
 
-				return new ECSResponse({ token: new TFAToken(user.id as string).encrypt(), mode: "sms" });
+				//TODO Remember to send user's actual phone number once nexmo service is setup.
+
+				return new ECSResponse({
+					token: new TFAToken(user.id as string).encrypt(),
+					type: "sms",
+					phone: "1234567890"
+				});
 
 			} else {
 
 				const session: Session = await user.getNewSession();
 
 				return new ECSResponse({
-					sessionId: session.id
+					token: session.id,
+					type: "session"
 				});
 
 			}
@@ -106,7 +114,7 @@ export class UserAuthRouter extends ECSRouter {
 	public async handleSignInTOTP(req: ECSRequest): Promise<ECSResponse> {
 
 		const key: string = req.get("key");
-		const code: string = req.get("code");
+		const code: string = req.get("token");
 
 		let id: string;
 
@@ -142,7 +150,7 @@ export class UserAuthRouter extends ECSRouter {
 
 		const session: Session = await user.getNewSession();
 
-		return new ECSResponse({ sessionId: session.id });
+		return new ECSResponse({ token: session.id, type: "session" });
 
 	}
 
@@ -163,23 +171,11 @@ export class UserAuthRouter extends ECSRouter {
 		const user: User = await ECSQLQuery.getObjectWithId(User, token.userId);
 		const session: Session = await user.getNewSession();
 
-		return new ECSResponse({ sessionId: session.id });
+		return new ECSResponse({ token: session.id, type: "session" });
 
 	}
 
 	public getRouter(): Express.Router {
-
-		this.add(new ECSRoute(
-			ECSRequestType.POST,
-			"/sign-up",
-			this.handleSignUp,
-			new ECSValidator(
-				new ECSTypeValidator({
-					email: StandardType.STRING,
-					password: StandardType.STRING
-				})
-			)
-		));
 
 		this.add(new ECSRoute(
 			ECSRequestType.POST,
@@ -200,7 +196,7 @@ export class UserAuthRouter extends ECSRouter {
 			new ECSValidator(
 				new ECSTypeValidator({
 					code: StandardType.STRING,
-					key: StandardType.STRING
+					token: StandardType.STRING
 				})
 			)
 		));
@@ -213,6 +209,18 @@ export class UserAuthRouter extends ECSRouter {
 				new ECSTypeValidator({
 					code: StandardType.STRING,
 					token: StandardType.STRING
+				})
+			)
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.POST,
+			"/sign-up",
+			this.handleSignUp,
+			new ECSValidator(
+				new ECSTypeValidator({
+					email: StandardType.STRING,
+					password: StandardType.STRING
 				})
 			)
 		));

@@ -118,7 +118,12 @@ export class UserSecurityRouter extends ECSRouter {
 
 		if (enable) {
 
-			return new ECSResponse({ token: new TFAToken(user.id as string).encrypt() });
+			//TODO Put user's real phone number in.
+
+			return new ECSResponse({
+				token: new TFAToken(user.id as string).encrypt(),
+				phone: "1234567890"
+			});
 
 		} else {
 
