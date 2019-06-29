@@ -15,7 +15,8 @@
 		"@elijahjcobb/request": "latest",
 		"@elijahjcobb/server": "latest",
 		"express": "latest",
-		"typit": "latest"
+		"typit": "latest",
+		"otplib": "latest"
 	},
 	"devDependencies": {
 		"@types/jest": "latest",
@@ -23,6 +24,7 @@
 		"@types/express": "latest",
 		"jest": "latest",
 		"tslint": "^5.18.0",
-		"typescript": "latest"
+		"typescript": "latest",
+		"@types/otplib": "latest"
 	}
 }
