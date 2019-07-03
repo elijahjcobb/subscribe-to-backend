@@ -33,14 +33,14 @@ import {
 	ECSValidator
 } from "@elijahjcobb/server";
 import * as Express from "express";
-import { SessionValidator } from "../session/SessionValidator";
-import { StandardType } from "typit";
-import { Session } from "../session/Session";
-import { Business } from "../objects/Business";
-import { Product } from "../objects/Product";
-import { ECSQLQuery } from "@elijahjcobb/nosql";
-import { Program } from "../objects/Program";
-import { ECArray } from "@elijahjcobb/collections";
+import {SessionValidator} from "../session/SessionValidator";
+import {StandardType} from "typit";
+import {Session} from "../session/Session";
+import {Business} from "../objects/Business";
+import {Product} from "../objects/Product";
+import {ECSQLCondition, ECSQLFilter, ECSQLFilterGroup, ECSQLOperator, ECSQLQuery} from "@elijahjcobb/nosql";
+import {Program, ProgramProps} from "../objects/Program";
+import {ECArray} from "@elijahjcobb/collections";
 
 export class ProgramRouter extends ECSRouter {
 
@@ -77,37 +77,20 @@ export class ProgramRouter extends ECSRouter {
 
 	public async handleGetAllForBusiness(req: ECSRequest): Promise<ECSResponse> {
 
-		const businessId: string = req.getParameters().get("id") as string;
-		const business: Business = await ECSQLQuery.getObjectWithId(Business, businessId);
-		const programs: ECArray<Program> = await business.getAllPrograms();
-
-		return new ECSResponse(programs.map((program: Program) => {
-
-			return program.getJSON();
-
-		}).toNativeArray());
-
-	}
-
-	public async handleGetOpenForBusiness(req: ECSRequest): Promise<ECSResponse> {
+		const closed: boolean = req.getEndpoint().indexOf("closed") !== -1;
 
 		const businessId: string = req.getParameters().get("id") as string;
 		const business: Business = await ECSQLQuery.getObjectWithId(Business, businessId);
-		const programs: ECArray<Program> = await business.getPrograms(false);
+		const query: ECSQLQuery<Program, ProgramProps> = new ECSQLQuery(
+			Program,
+			new ECSQLFilterGroup(
+				ECSQLCondition.And,
+				new ECSQLFilter("businessId", ECSQLOperator.Equal, business.id as string),
+				new ECSQLFilter("closed", ECSQLOperator.Equal, closed),
+			)
+		);
 
-		return new ECSResponse(programs.map((program: Program) => {
-
-			return program.getJSON();
-
-		}).toNativeArray());
-
-	}
-
-	public async handleGetClosedForBusiness(req: ECSRequest): Promise<ECSResponse> {
-
-		const businessId: string = req.getParameters().get("id") as string;
-		const business: Business = await ECSQLQuery.getObjectWithId(Business, businessId);
-		const programs: ECArray<Program> = await business.getPrograms(true);
+		const programs: ECArray<Program> = await query.getAllObjects();
 
 		return new ECSResponse(programs.map((program: Program) => {
 
@@ -241,14 +224,8 @@ export class ProgramRouter extends ECSRouter {
 
 		this.add(new ECSRoute(
 			ECSRequestType.GET,
-			"/business/:id/open",
-			this.handleGetOpenForBusiness
-		));
-
-		this.add(new ECSRoute(
-			ECSRequestType.GET,
 			"/business/:id/closed",
-			this.handleGetClosedForBusiness
+			this.handleGetAllForBusiness
 		));
 
 		this.add(new ECSRoute(

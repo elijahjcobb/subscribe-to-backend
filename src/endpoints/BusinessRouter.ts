@@ -98,17 +98,6 @@ export class BusinessRouter extends ECSRouter {
 
 	}
 
-	public async handleGetMeAll(req: ECSRequest): Promise<ECSResponse> {
-
-		const session: Session = req.getSession();
-
-		const businesses: ECArray<Business> = await BusinessOwner.getAllBusinessesForUserId(session.props.userId as string);
-		const formattedBusinesses: ECArray<object> = businesses.map((business: Business) => { return business.getJSON(); });
-
-		return new ECSResponse(formattedBusinesses.toNativeArray());
-
-	}
-
 	public async handleGetAll(req: ECSRequest): Promise<ECSResponse> {
 
 		const query: ECSQLQuery<Business, BusinessProps> = new ECSQLQuery(Business);
@@ -195,18 +184,6 @@ export class BusinessRouter extends ECSRouter {
 				SessionValidator
 					.init()
 					.business()
-			)
-		));
-
-		this.add(new ECSRoute(
-			ECSRequestType.GET,
-			"/me/all",
-			this.handleGetMeAll,
-			new ECSValidator(
-				undefined,
-				SessionValidator
-					.init()
-					.admin()
 			)
 		));
 
