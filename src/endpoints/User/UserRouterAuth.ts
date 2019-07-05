@@ -168,7 +168,7 @@ export class UserRouterAuth extends ECSRouter {
 				.show();
 		}
 
-		const user: User = await ECSQLQuery.getObjectWithId(User, token.userId);
+		const user: User = await ECSQLQuery.getObjectWithId(User, token.data);
 		const session: Session = await user.getNewSession();
 
 		return new ECSResponse({ token: session.id, type: "session" });

@@ -33,25 +33,34 @@ import {
 	ECSValidator
 } from "@elijahjcobb/server";
 import * as Express from "express";
-import {StandardType} from "typit";
-import {User} from "../../objects/User";
-import {Session} from "../../session/Session";
-import {SessionValidator} from "../../session/SessionValidator";
-import {TOTP} from "../../session/TOTP";
-import {TFAToken} from "../../session/TFA";
+import { StandardType } from "typit";
+import { User } from "../../objects/User";
+import { Session } from "../../session/Session";
+import { SessionValidator } from "../../session/SessionValidator";
+import { TFAToken } from "../../session/TFA";
 import { UserRouterSecurityTFA } from "./UserRouterSecurityTFA";
 
 export class UserRouterSecurity extends ECSRouter {
 
-	public verifyPassword(user: User, password: string): void {
+	public async handleUpdatePassword(req: ECSRequest): Promise<ECSResponse> {
 
-		if (!user.passwordIsCorrect(password)) {
+		const session: Session = req.getSession();
+		const user: User = await session.getUser();
+		const newPassword: string = req.get("new");
+		const oldPassword: string = req.get("old");
+
+		if (!user.passwordIsCorrect(oldPassword)) {
 			throw ECSError
 				.init()
 				.code(401)
 				.msg("Password incorrect.")
 				.show();
 		}
+
+		user.props.pepper = User.createPepper(user.props.salt as Buffer, newPassword);
+		await user.updateProps("pepper");
+
+		return new ECSResponse(user.getJSON());
 
 	}
 
@@ -62,13 +71,56 @@ export class UserRouterSecurity extends ECSRouter {
 		const email: string = req.get("email");
 		const password: string = req.get("password");
 
-		this.verifyPassword(user, password);
+		if (!user.passwordIsCorrect(password)) {
+			throw ECSError
+				.init()
+				.code(401)
+				.msg("Password incorrect.")
+				.show();
+		}
 
-		user.props.email = email;
+		let token: TFAToken = new TFAToken(email);
+		let tokenString: string = token.encrypt();
+
+		console.log("FAKE SEND EMAIL:", email, token.code);
+
+		return new ECSResponse({
+			token: tokenString
+		});
+
+
+	}
+
+	public async handleUpdateEmailFinalize(req: ECSRequest): Promise<ECSResponse> {
+
+		const session: Session = req.getSession();
+		const user: User = await session.getUser();
+		const tokenString: string = req.get("token");
+		const code: string = req.get("code");
+		let token: TFAToken;
+
+		try {
+			token = TFAToken.decrypt(tokenString);
+		} catch (e) {
+			throw ECSError
+				.init()
+				.code(400)
+				.msg("Invalid token.")
+				.show();
+		}
+
+		if (code !== token.code) {
+			throw ECSError
+				.init()
+				.code(401)
+				.msg("Incorrect code.")
+				.show();
+		}
+
+		user.props.email = token.data;
 		await user.updateProps("email");
 
 		return new ECSResponse(user.getJSON());
-
 
 	}
 
@@ -79,26 +131,55 @@ export class UserRouterSecurity extends ECSRouter {
 		const phone: string = req.get("phone");
 		const password: string = req.get("password");
 
-		this.verifyPassword(user, password);
+		if (!user.passwordIsCorrect(password)) {
+			throw ECSError
+				.init()
+				.code(401)
+				.msg("Password incorrect.")
+				.show();
+		}
 
-		user.props.phone = phone;
-		await user.updateProps("phone");
+		let token: TFAToken = new TFAToken(phone);
+		let tokenString: string = token.encrypt();
 
-		return new ECSResponse(user.getJSON());
+		console.log("FAKE SEND PHONE:", phone, token.code);
+
+		return new ECSResponse({
+			token: tokenString
+		});
+
 
 	}
 
-	public async handleUpdatePassword(req: ECSRequest): Promise<ECSResponse> {
+	public async handleUpdatePhoneFinalize(req: ECSRequest): Promise<ECSResponse> {
 
 		const session: Session = req.getSession();
 		const user: User = await session.getUser();
-		const newPassword: string = req.get("new");
-		const oldPassword: string = req.get("old");
+		const tokenString: string = req.get("token");
+		const code: string = req.get("code");
 
-		this.verifyPassword(user, oldPassword);
+		let token: TFAToken;
 
-		user.props.pepper = User.createPepper(user.props.salt as Buffer, newPassword);
-		await user.updateProps("pepper");
+		try {
+			token = TFAToken.decrypt(tokenString);
+		} catch (e) {
+			throw ECSError
+				.init()
+				.code(400)
+				.msg("Invalid token.")
+				.show();
+		}
+
+		if (code !== token.code) {
+			throw ECSError
+				.init()
+				.code(401)
+				.msg("Incorrect code.")
+				.show();
+		}
+
+		user.props.phone = token.data;
+		await user.updateProps("phone");
 
 		return new ECSResponse(user.getJSON());
 
@@ -108,12 +189,42 @@ export class UserRouterSecurity extends ECSRouter {
 
 		this.add(new ECSRoute(
 			ECSRequestType.PUT,
+			"/password",
+			this.handleUpdatePassword,
+			new ECSValidator(
+				new ECSTypeValidator({
+					old: StandardType.STRING,
+					new: StandardType.STRING
+				}),
+				SessionValidator
+					.init()
+					.user()
+			)
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.PUT,
 			"/email",
 			this.handleUpdateEmail,
 			new ECSValidator(
 				new ECSTypeValidator({
 					email: StandardType.STRING,
 					password: StandardType.STRING
+				}),
+				SessionValidator
+					.init()
+					.user()
+			)
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.POST,
+			"/email/finalize",
+			this.handleUpdateEmailFinalize,
+			new ECSValidator(
+				new ECSTypeValidator({
+					token: StandardType.STRING,
+					code: StandardType.STRING
 				}),
 				SessionValidator
 					.init()
@@ -138,13 +249,13 @@ export class UserRouterSecurity extends ECSRouter {
 		));
 
 		this.add(new ECSRoute(
-			ECSRequestType.PUT,
-			"/password",
-			this.handleUpdatePassword,
+			ECSRequestType.POST,
+			"/phone/finalize",
+			this.handleUpdatePhoneFinalize,
 			new ECSValidator(
 				new ECSTypeValidator({
-					old: StandardType.STRING,
-					new: StandardType.STRING
+					token: StandardType.STRING,
+					code: StandardType.STRING
 				}),
 				SessionValidator
 					.init()
