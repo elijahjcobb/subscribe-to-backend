@@ -51,7 +51,7 @@ export class UserRouterAuthSignUp extends ECSRouter {
 		const token: TFAToken = await User.getSignUpToken(email, password);
 
 		return new ECSResponse({
-			token,
+			token: token.encrypt(),
 			type: "sign-up"
 		});
 

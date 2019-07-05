@@ -34,20 +34,6 @@ describe("User", () => {
 
 	test("Sign Up", async () => {
 
-
-		let user: User;
-
-		try {
-			user = await User.signUp("elijah@elijahcobb.com", "alpine");
-		} catch (e) {
-			e.print();
-		}
-		//
-		// expect(user.id).toBeDefined();
-		// expect(user.props.email).toBeDefined();
-		// expect(user.props.pepper).toBeDefined();
-		// expect(user.props.salt).toBeDefined();
-
 	});
 
 });
