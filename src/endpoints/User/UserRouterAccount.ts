@@ -45,7 +45,7 @@ export class UserRouterAccount extends ECSRouter {
 
 		const session: Session = req.getSession();
 		const user: User = await session.getUser();
-		const endpoint: string = req.getEndpoint().replace("/me/", "");
+		const endpoint: string = req.getEndpoint().replace("/", "");
 
 		if (endpoint === "name") {
 
