@@ -39,15 +39,65 @@ import {Session} from "../../session/Session";
 import {ECSQLQuery} from "@elijahjcobb/nosql";
 import {TFAToken} from "../../session/TFA";
 import {Encryption} from "../../session/Encryption";
-import { UserRouterAuthSignUp } from "./UserRouterAuthSignUp";
-import { UserRouterAuthSignIn } from "./UserRouterAuthSignIn";
 
-export class UserRouterAuth extends ECSRouter {
+export class UserRouterAuthSignUp extends ECSRouter {
+
+
+	public async handleSignUp(req: ECSRequest): Promise<ECSResponse> {
+
+		const email: string = req.get("email");
+		const password: string = req.get("password");
+
+		const token: TFAToken = await User.getSignUpToken(email, password);
+
+		return new ECSResponse({
+			token,
+			type: "sign-up"
+		});
+
+	}
+
+	public async handleSignUpFinalize(req: ECSRequest): Promise<ECSResponse> {
+
+		const token: string = req.get("token");
+		const code: string = req.get("code");
+
+		const user: User = await User.finalizeSignUp(token, code);
+		const session: Session = await user.getNewSession();
+
+		return new ECSResponse({
+			token: session.id,
+			type: "session"
+		});
+
+	}
 
 	public getRouter(): Express.Router {
 
-		this.use("/sign-up", new UserRouterAuthSignUp());
-		this.use("/sign-in", new UserRouterAuthSignIn());
+		this.add(new ECSRoute(
+			ECSRequestType.POST,
+			"/",
+			this.handleSignUp,
+			new ECSValidator(
+				new ECSTypeValidator({
+					email: StandardType.STRING,
+					password: StandardType.STRING
+				})
+			)
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.POST,
+			"/finalize",
+			this.handleSignUpFinalize,
+			new ECSValidator(
+				new ECSTypeValidator({
+					token: StandardType.STRING,
+					code: StandardType.STRING
+				})
+			)
+		));
+
 
 		return this.createRouter();
 

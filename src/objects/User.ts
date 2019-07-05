@@ -22,18 +22,14 @@
  *
  */
 
-import {
-	ECSQLFilter,
-	ECSQLObject,
-	ECSQLOperator,
-	ECSQLQuery
-} from "@elijahjcobb/nosql";
+import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
 import { ECErrorOriginType, ECErrorStack, ECErrorType } from "@elijahjcobb/error";
 import { ECGenerator, ECHash } from "@elijahjcobb/encryption";
 import { Session } from "../session/Session";
-import {ECSQLFilteredJSON} from "@elijahjcobb/nosql/dist/object/ECSQLObject";
-import {TOTP} from "../session/TOTP";
-import {ECSError} from "@elijahjcobb/server";
+import { ECSQLFilteredJSON } from "@elijahjcobb/nosql/dist/object/ECSQLObject";
+import { TOTP } from "../session/TOTP";
+import { TFAToken } from "../session/TFA";
+import { ECSError } from "@elijahjcobb/server";
 
 export enum UserGender {
 	Male,
@@ -44,6 +40,12 @@ export enum UserGender {
 export interface TestUser {
 	firstName: string;
 }
+
+type SignUpToken = {
+	email: string;
+	salt: string;
+	pepper: string;
+};
 
 export interface UserProps extends TestUser {
 	firstName: string;
@@ -166,7 +168,7 @@ export class User extends ECSQLObject<UserProps> {
 
 	}
 
-	public static async signUp(email: string, password: string): Promise<User> {
+	public static async getSignUpToken(email: string, password: string): Promise<TFAToken> {
 
 		if (await this.doesUserExistForEmail(email)) {
 			throw ECErrorStack.newWithMessageAndType(
@@ -175,17 +177,48 @@ export class User extends ECSQLObject<UserProps> {
 				new Error("A user already exits with this email address."));
 		}
 
+		const salt: Buffer = ECGenerator.randomBytes(32);
+
+		let tokenPayload: SignUpToken = {
+			email,
+			salt: salt.toString("base64"),
+			pepper: User.createPepper(salt, password).toString("base64")
+		};
+
+		let tokenPayloadData: Buffer = Buffer.from(JSON.stringify(tokenPayload), "utf8");
+		let tokenPayloadString: string = tokenPayloadData.toString("base64");
+
+		return new TFAToken(tokenPayloadString);
+
+	}
+
+	public static async finalizeSignUp(token: string, code: string): Promise<User> {
+
+		const decryptedToken: TFAToken = TFAToken.decrypt(token);
+
+		if (code !== decryptedToken.code) {
+			throw ECSError
+				.init()
+				.code(401)
+				.msg("Incorrect code.")
+				.show();
+		}
+
+		const tokenPayloadString: string = decryptedToken.data;
+		const tokenPayloadData: Buffer = Buffer.from(tokenPayloadString, "base64");
+		const tokenPayloadObject: SignUpToken = JSON.parse(tokenPayloadData.toString("utf8"));
+
+		const email: string = tokenPayloadObject.email;
+		const pepper: Buffer = Buffer.from(tokenPayloadObject.pepper, "base64");
+		const salt: Buffer = Buffer.from(tokenPayloadObject.salt, "base64");
+
 		let user: User = new User();
+		user.props.salt = salt;
+		user.props.pepper = pepper;
 		user.props.email = email;
-
-		user.props.salt = ECGenerator.randomBytes(32);
-		user.props.pepper = this.createPepper(user.props.salt, password);
-		user.props.gender = UserGender.Other;
-
 		await user.create();
 
 		return user;
-
 	}
 
 	public static async signIn(email: string, password: string): Promise<User> {
