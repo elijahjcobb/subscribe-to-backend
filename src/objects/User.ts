@@ -145,7 +145,7 @@ export class User extends ECSQLObject<UserProps> {
 
 	}
 
-	private static createPepper(salt: Buffer, password: string): Buffer {
+	public static createPepper(salt: Buffer, password: string): Buffer {
 
 		let pepper: Buffer = Buffer.from(password, "utf8");
 		for (let i: number = 0; i < 1000; i++) pepper = ECHash.hash(Buffer.concat([pepper, salt]));
