@@ -26,16 +26,16 @@ import { ECGenerator } from "@elijahjcobb/encryption";
 import {ECSError} from "@elijahjcobb/server";
 import {Encryption} from "./Encryption";
 
-export type TFATokenObject = { userId: string; code: string; };
+export type TFATokenObject = { data: string; code: string; };
 
 export class TFAToken {
 
 	public code: string;
-	public userId: string;
+	public data: string;
 
-	public constructor(userId: string) {
+	public constructor(data: string) {
 
-		this.userId = userId;
+		this.data = data;
 		this.code = ECGenerator.randomCode();
 
 	}
@@ -44,10 +44,10 @@ export class TFAToken {
 
 		const tokenObject: TFATokenObject = {
 			code: this.code,
-			userId: this.userId
+			data: this.data
 		};
 
-		console.log(`Simulated TFA SMS Message: '${this.code}' for user with id '${this.userId}'.`);
+		console.log(`Simulated TFA SMS Message: '${this.code}' for user with id '${this.data}'.`);
 
 		try {
 
@@ -79,7 +79,7 @@ export class TFAToken {
 			const tokenString: string = decryptedTokenData.toString("utf8");
 			const tokenObject: TFATokenObject = JSON.parse(tokenString) as TFATokenObject;
 
-			let newToken: TFAToken = new TFAToken(tokenObject.userId);
+			let newToken: TFAToken = new TFAToken(tokenObject.data);
 			newToken.code = tokenObject.code;
 
 			return newToken;
