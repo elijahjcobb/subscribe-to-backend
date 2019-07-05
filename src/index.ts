@@ -32,7 +32,6 @@ import { FilesRouter } from "./endpoints/FilesRouter";
 import * as FileSystem from "fs";
 import { ProgramRouter } from "./endpoints/ProgramRouter";
 import { SubscriptionRouter } from "./endpoints/SubscriptionRouter";
-import {TOTP} from "./session/TOTP";
 import { Encryption } from "./session/Encryption";
 
 let databaseConfig: ECSQLInitObject;
@@ -40,35 +39,29 @@ let port: number;
 
 if (process.env.USER === "elijahcobb") {
 
+	port = 3000;
+
+	let password: string;
+
 	if (process.platform === "darwin") {
 
 		console.log("Running local environment (Elijah's Laptop).");
-
-		databaseConfig = {
-			database: "subscribeto",
-			password: "alpine",
-			verbose: true
-		};
-
 		Encryption.init(FileSystem.readFileSync("/Users/elijahcobb/.s2.enc"));
-
-		port = 3000;
+		password = "alpine";
 
 	} else {
 
 		console.log("Running local environment (Elijah's Desktop).");
-
-		databaseConfig = {
-			database: "subscribeto",
-			password: "alpine",
-			verbose: true
-		};
-
-		Encryption.init(FileSystem.readFileSync("/home/elijahcobb/.s2.enc"));
-
-		port = 3000;
+		Encryption.init(FileSystem.readFileSync("/home/elijahcobb/.s2-enc"));
+		password = "";
 
 	}
+
+	databaseConfig = {
+		database: "subscribeto",
+		password,
+		verbose: true
+	};
 
 } else {
 
