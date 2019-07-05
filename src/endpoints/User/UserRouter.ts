@@ -22,122 +22,18 @@
  *
  */
 
-import {
-	ECSError,
-	ECSRequest,
-	ECSRequestType,
-	ECSResponse,
-	ECSRoute,
-	ECSRouter,
-	ECSTypeValidator,
-	ECSValidator
-} from "@elijahjcobb/server";
+import { ECSRouter }from "@elijahjcobb/server";
 import * as Express from "express";
-import {OptionalType, StandardType} from "typit";
-import {User} from "../../objects/User";
-import {Session} from "../../session/Session";
-import {SessionValidator} from "../../session/SessionValidator";
-import {BusinessOwner} from "../../objects/BusinessOwner";
-import {Business} from "../../objects/Business";
-import {ECSQLQuery} from "@elijahjcobb/nosql";
-import {UserAuthRouter} from "./UserAuthRouter";
-import {UserAccountRouter} from "./UserAccountRouter";
+import {UserRouterAuth} from "./UserRouterAuth";
+import {UserRouterMe} from "./UserRouterMe";
 
 export class UserRouter extends ECSRouter {
 
-	public async handleGetSelf(req: ECSRequest): Promise<ECSResponse> {
-
-		const session: Session = req.getSession();
-		const user: User = await session.getUser();
-
-		return new ECSResponse(user.getJSON());
-
-	}
-
-	public async handleGetSelfSession(req: ECSRequest): Promise<ECSResponse> {
-
-		const session: Session = req.getSession();
-
-		return new ECSResponse(session.getJSON());
-
-	}
-
-	public async handleSetSelfSessionBusiness(req: ECSRequest): Promise<ECSResponse> {
-
-		const session: Session = req.getSession();
-		const businessId: string | undefined  = req.get("id");
-
-		if (businessId === undefined) {
-
-			session.props.businessId = undefined;
-			await session.update();
-
-		} else {
-
-			const business: Business | undefined = await ECSQLQuery.getObjectWithId(Business, businessId, true);
-
-			if (business === undefined) throw ECSError.init().msg("The business you are referencing does not exist.").code(404).show();
-			if (session.props.userId === undefined) throw ECSError.init().msg("Your session does not have a userId.").show().code(400);
-
-			if (await BusinessOwner.isUserIdOwnerOfBusinessId(session.props.userId, businessId)) {
-
-				session.props.businessId = businessId;
-				await session.update();
-
-			} else {
-
-				throw ECSError.init().msg(`You are not an owner of ${business.props.name}.`).code(401).show();
-
-			}
-
-		}
-
-		return new ECSResponse(session.getJSON());
-
-	}
 
 	public getRouter(): Express.Router {
 
-		this.use("/me/account", new UserAccountRouter());
-		this.use("/auth", new UserAuthRouter());
-
-		this.add(new ECSRoute(
-			ECSRequestType.GET,
-			"/me",
-			this.handleGetSelf,
-			new ECSValidator(
-				undefined,
-				SessionValidator
-					.init()
-					.user()
-			)
-		));
-
-		this.add(new ECSRoute(
-			ECSRequestType.GET,
-			"/me/session",
-			this.handleGetSelfSession,
-			new ECSValidator(
-				undefined,
-				SessionValidator
-					.init()
-					.user()
-			)
-		));
-
-		this.add(new ECSRoute(
-			ECSRequestType.PUT,
-			"/me/session/business",
-			this.handleSetSelfSessionBusiness,
-			new ECSValidator(
-				new ECSTypeValidator({
-					id: new OptionalType(StandardType.STRING)
-				}),
-				SessionValidator
-					.init()
-					.user()
-			)
-		));
+		this.use("/me", new UserRouterMe());
+		this.use("/auth", new UserRouterAuth());
 
 		return this.createRouter();
 

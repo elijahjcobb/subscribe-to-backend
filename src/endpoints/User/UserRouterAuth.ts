@@ -40,7 +40,7 @@ import {ECSQLQuery} from "@elijahjcobb/nosql";
 import {TFAToken} from "../../session/TFA";
 import {Encryption} from "../../session/Encryption";
 
-export class UserAuthRouter extends ECSRouter {
+export class UserRouterAuth extends ECSRouter {
 
 
 	public async handleSignUp(req: ECSRequest): Promise<ECSResponse> {
@@ -113,20 +113,20 @@ export class UserAuthRouter extends ECSRouter {
 
 	public async handleSignInTOTP(req: ECSRequest): Promise<ECSResponse> {
 
-		const key: string = req.get("key");
-		const code: string = req.get("token");
+		const token: string = req.get("token");
+		const code: string = req.get("code");
 
 		let id: string;
 
 		try {
 
-			const keyData: Buffer = Buffer.from(key, "hex");
+			const keyData: Buffer = Buffer.from(token, "hex");
 			const idData: Buffer = Encryption.decrypt(keyData);
 			id = idData.toString("utf8");
 
 		} catch (e) {
 
-			throw ECSError.init().msg("Invalid password or key.").code(401).show();
+			throw ECSError.init().msg("Could not decrypt shared password token.");
 
 		}
 
@@ -144,7 +144,7 @@ export class UserAuthRouter extends ECSRouter {
 			throw ECSError
 				.init()
 				.code(401)
-				.msg("Incorrect code, try again.")
+				.msg("Incorrect code.")
 				.show();
 		}
 

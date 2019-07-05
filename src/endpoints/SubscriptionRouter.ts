@@ -104,7 +104,7 @@ export class SubscriptionRouter extends ECSRouter {
 
 		this.routes.add(new ECSRoute(
 			ECSRequestType.GET,
-			"/user/:id",
+			"/user/me",
 			this.handleGetTemp,
 			new ECSValidator(
 				undefined,
@@ -116,7 +116,7 @@ export class SubscriptionRouter extends ECSRouter {
 
 		this.routes.add(new ECSRoute(
 			ECSRequestType.GET,
-			"/business/:id",
+			"/business/me",
 			this.handleGetTemp,
 			new ECSValidator(
 				undefined,

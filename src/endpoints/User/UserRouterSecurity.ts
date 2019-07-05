@@ -40,7 +40,7 @@ import {SessionValidator} from "../../session/SessionValidator";
 import {TOTP} from "../../session/TOTP";
 import {TFAToken} from "../../session/TFA";
 
-export class UserSecurityRouter extends ECSRouter {
+export class UserRouterSecurity extends ECSRouter {
 
 	public async handleToggleTOTP(req: ECSRequest): Promise<ECSResponse> {
 

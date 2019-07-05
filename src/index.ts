@@ -108,7 +108,6 @@ server.setAuthorizationMiddleware(async(req: ECSRequest): Promise<ECSRequest> =>
 
 });
 
-
 server.use("/user", new UserRouter());
 server.use("/business", new BusinessRouter());
 server.use("/product", new ProductRouter());

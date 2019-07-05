@@ -37,9 +37,9 @@ import {StandardType} from "typit";
 import {User, UserGender} from "../../objects/User";
 import {Session} from "../../session/Session";
 import {SessionValidator} from "../../session/SessionValidator";
-import {UserSecurityRouter} from "./UserSecurityRouter";
+import {UserRouterSecurity} from "./UserRouterSecurity";
 
-export class UserAccountRouter extends ECSRouter {
+export class UserRouterAccount extends ECSRouter {
 
 	public async handleUpdate(req: ECSRequest): Promise<ECSResponse> {
 
@@ -97,7 +97,7 @@ export class UserAccountRouter extends ECSRouter {
 
 	public getRouter(): Express.Router {
 
-		this.use("/security", new UserSecurityRouter());
+		this.use("/security", new UserRouterSecurity());
 
 		this.add(new ECSRoute(
 			ECSRequestType.PUT,
