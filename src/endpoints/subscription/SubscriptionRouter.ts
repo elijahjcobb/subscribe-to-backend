@@ -93,10 +93,33 @@ export class SubscriptionRouter extends ECSRouter {
 
 	}
 
+	public async handleGetAllForUser(req: ECSRequest): Promise<ECSResponse> {
 
-	public async handleGetTemp(req: ECSRequest): Promise<ECSResponse> {
+		throw ECSError.init().code(501).show().msg("Will be implemented soon.");
 
-		throw ECSError.init().code(501).show().msg("Will be implemented soon...");
+	}
+
+	public async handleGetAllForBusiness(req: ECSRequest): Promise<ECSResponse> {
+
+		throw ECSError.init().code(501).show().msg("Will be implemented soon.");
+
+	}
+
+	public async handleGetAllForProgram(req: ECSRequest): Promise<ECSResponse> {
+
+		throw ECSError.init().code(501).show().msg("Will be implemented soon.");
+
+	}
+
+	public async handleGetAllForProduct(req: ECSRequest): Promise<ECSResponse> {
+
+		throw ECSError.init().code(501).show().msg("Will be implemented soon.");
+
+	}
+
+	public async handleGet(req: ECSRequest): Promise<ECSResponse> {
+
+		throw ECSError.init().code(501).show().msg("Will be implemented soon.");
 
 	}
 
@@ -105,7 +128,7 @@ export class SubscriptionRouter extends ECSRouter {
 		this.routes.add(new ECSRoute(
 			ECSRequestType.GET,
 			"/user/me",
-			this.handleGetTemp,
+			this.handleGetAllForUser,
 			new ECSValidator(
 				undefined,
 				SessionValidator
@@ -117,7 +140,7 @@ export class SubscriptionRouter extends ECSRouter {
 		this.routes.add(new ECSRoute(
 			ECSRequestType.GET,
 			"/business/me",
-			this.handleGetTemp,
+			this.handleGetAllForBusiness,
 			new ECSValidator(
 				undefined,
 				SessionValidator
@@ -129,7 +152,7 @@ export class SubscriptionRouter extends ECSRouter {
 		this.routes.add(new ECSRoute(
 			ECSRequestType.GET,
 			"/program/:id",
-			this.handleGetTemp,
+			this.handleGetAllForProgram,
 			new ECSValidator(
 				undefined,
 				SessionValidator
@@ -141,7 +164,7 @@ export class SubscriptionRouter extends ECSRouter {
 		this.routes.add(new ECSRoute(
 			ECSRequestType.GET,
 			"/product/:id",
-			this.handleGetTemp,
+			this.handleGetAllForProduct,
 			new ECSValidator(
 				undefined,
 				SessionValidator
@@ -151,9 +174,9 @@ export class SubscriptionRouter extends ECSRouter {
 		));
 
 		this.routes.add(new ECSRoute(
-			ECSRequestType.POST,
+			ECSRequestType.GET,
 			"/:id",
-			this.handleGetTemp
+			this.handleGet
 		));
 
 		this.routes.add(new ECSRoute(
