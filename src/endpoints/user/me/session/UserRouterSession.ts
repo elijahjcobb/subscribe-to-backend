@@ -86,6 +86,28 @@ export class UserRouterSession extends ECSRouter {
 
 	}
 
+	public async handleSignOut(req: ECSRequest): Promise<ECSResponse> {
+
+		const session: Session = req.getSession();
+
+		session.props.dead = true;
+		await session.updateProps("dead");
+
+		return new ECSResponse(session.getJSON());
+
+	}
+
+	public async handleSignOutAll(req: ECSRequest): Promise<ECSResponse> {
+
+		const session: Session = req.getSession();
+		const user: User = await session.getUser();
+
+		await user.signOutOfAllSessions();
+
+		return new ECSResponse(session.getJSON());
+
+	}
+
 	public getRouter(): Express.Router {
 
 
@@ -109,6 +131,30 @@ export class UserRouterSession extends ECSRouter {
 				new ECSTypeValidator({
 					id: new OptionalType(StandardType.STRING)
 				}),
+				SessionValidator
+					.init()
+					.user()
+			)
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.DELETE,
+			"/sign-out",
+			this.handleSignOut,
+			new ECSValidator(
+				undefined,
+				SessionValidator
+					.init()
+					.user()
+			)
+		));
+
+		this.add(new ECSRoute(
+			ECSRequestType.DELETE,
+			"/sign-out/all",
+			this.handleSignOutAll,
+			new ECSValidator(
+				undefined,
 				SessionValidator
 					.init()
 					.user()
