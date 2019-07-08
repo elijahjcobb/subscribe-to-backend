@@ -33,13 +33,13 @@ import {
 	ECSValidator
 } from "@elijahjcobb/server";
 import * as Express from "express";
-import { SessionValidator } from "../session/SessionValidator";
+import { SessionValidator } from "../../session/SessionValidator";
 import { StandardType, OptionalType } from "typit";
-import { Session } from "../session/Session";
-import { Product } from "../objects/Product";
-import { Files } from "../files/Files";
+import { Session } from "../../session/Session";
+import { Product } from "../../objects/Product";
+import { Files } from "../../files/Files";
 import {ECSQLQuery} from "@elijahjcobb/nosql";
-import { Business } from "../objects/Business";
+import { Business } from "../../objects/Business";
 import { ECArray } from "@elijahjcobb/collections";
 
 export class ProductRouter extends ECSRouter {

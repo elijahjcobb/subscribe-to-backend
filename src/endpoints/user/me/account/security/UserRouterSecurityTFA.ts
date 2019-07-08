@@ -34,11 +34,11 @@ import {
 } from "@elijahjcobb/server";
 import * as Express from "express";
 import {StandardType} from "typit";
-import {User} from "../../objects/User";
-import {Session} from "../../session/Session";
-import {SessionValidator} from "../../session/SessionValidator";
-import {TOTP} from "../../session/TOTP";
-import {TFAToken} from "../../session/TFA";
+import {User} from "../../../../../objects/User";
+import {Session} from "../../../../../session/Session";
+import {SessionValidator} from "../../../../../session/SessionValidator";
+import {TOTP} from "../../../../../session/TOTP";
+import {TFAToken} from "../../../../../session/TFA";
 
 export class UserRouterSecurityTFA extends ECSRouter {
 

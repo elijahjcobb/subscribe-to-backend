@@ -23,31 +23,47 @@
  */
 
 import {
-	ECSError,
 	ECSRequest,
 	ECSRequestType,
 	ECSResponse,
 	ECSRoute,
 	ECSRouter,
-	ECSTypeValidator,
 	ECSValidator
 } from "@elijahjcobb/server";
 import * as Express from "express";
-import { StandardType} from "typit";
-import {User} from "../../objects/User";
-import {Session} from "../../session/Session";
-import {ECSQLQuery} from "@elijahjcobb/nosql";
-import {TFAToken} from "../../session/TFA";
-import {Encryption} from "../../session/Encryption";
-import { UserRouterAuthSignUp } from "./UserRouterAuthSignUp";
-import { UserRouterAuthSignIn } from "./UserRouterAuthSignIn";
+import {User} from "../../../objects/User";
+import {Session} from "../../../session/Session";
+import {SessionValidator} from "../../../session/SessionValidator";
+import {UserRouterAccount} from "./account/UserRouterAccount";
+import {UserRouterSession} from "./session/UserRouterSession";
 
-export class UserRouterAuth extends ECSRouter {
+export class UserRouterMe extends ECSRouter {
+
+	public async handleGetSelf(req: ECSRequest): Promise<ECSResponse> {
+
+		const session: Session = req.getSession();
+		const user: User = await session.getUser();
+
+		return new ECSResponse(user.getJSON());
+
+	}
 
 	public getRouter(): Express.Router {
 
-		this.use("/sign-up", new UserRouterAuthSignUp());
-		this.use("/sign-in", new UserRouterAuthSignIn());
+		this.use("/account", new UserRouterAccount());
+		this.use("/session", new UserRouterSession());
+
+		this.add(new ECSRoute(
+			ECSRequestType.GET,
+			"/",
+			this.handleGetSelf,
+			new ECSValidator(
+				undefined,
+				SessionValidator
+					.init()
+					.user()
+			)
+		));
 
 		return this.createRouter();
 

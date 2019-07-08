@@ -34,24 +34,15 @@ import {
 } from "@elijahjcobb/server";
 import * as Express from "express";
 import {OptionalType, StandardType} from "typit";
-import {User} from "../../objects/User";
-import {Session} from "../../session/Session";
-import {SessionValidator} from "../../session/SessionValidator";
-import {BusinessOwner} from "../../objects/BusinessOwner";
-import {Business} from "../../objects/Business";
+import {User} from "../../../../objects/User";
+import {Session} from "../../../../session/Session";
+import {SessionValidator} from "../../../../session/SessionValidator";
+import {BusinessOwner} from "../../../../objects/BusinessOwner";
+import {Business} from "../../../../objects/Business";
 import {ECSQLQuery} from "@elijahjcobb/nosql";
-import {UserRouterAccount} from "./UserRouterAccount";
+import {UserRouterAccount} from "../account/UserRouterAccount";
 
-export class UserRouterMe extends ECSRouter {
-
-	public async handleGetSelf(req: ECSRequest): Promise<ECSResponse> {
-
-		const session: Session = req.getSession();
-		const user: User = await session.getUser();
-
-		return new ECSResponse(user.getJSON());
-
-	}
+export class UserRouterSession extends ECSRouter {
 
 	public async handleGetSelfSession(req: ECSRequest): Promise<ECSResponse> {
 
@@ -97,23 +88,10 @@ export class UserRouterMe extends ECSRouter {
 
 	public getRouter(): Express.Router {
 
-		this.use("/account", new UserRouterAccount());
 
 		this.add(new ECSRoute(
 			ECSRequestType.GET,
 			"/",
-			this.handleGetSelf,
-			new ECSValidator(
-				undefined,
-				SessionValidator
-					.init()
-					.user()
-			)
-		));
-
-		this.add(new ECSRoute(
-			ECSRequestType.GET,
-			"/session",
 			this.handleGetSelfSession,
 			new ECSValidator(
 				undefined,
@@ -125,7 +103,7 @@ export class UserRouterMe extends ECSRouter {
 
 		this.add(new ECSRoute(
 			ECSRequestType.PUT,
-			"/session/business",
+			"/business",
 			this.handleSetSelfSessionBusiness,
 			new ECSValidator(
 				new ECSTypeValidator({

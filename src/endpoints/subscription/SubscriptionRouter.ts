@@ -34,13 +34,13 @@ import {
 } from "@elijahjcobb/server";
 import * as Express from "express";
 import { StandardType, OptionalType } from "typit";
-import { SessionValidator } from "../session/SessionValidator";
-import { Subscription } from "../objects/Subscription";
-import { Session } from "../session/Session";
-import { User } from "../objects/User";
-import { Business } from "../objects/Business";
+import { SessionValidator } from "../../session/SessionValidator";
+import { Subscription } from "../../objects/Subscription";
+import { Session } from "../../session/Session";
+import { User } from "../../objects/User";
+import { Business } from "../../objects/Business";
 import { ECSQLQuery } from "@elijahjcobb/nosql";
-import { Program } from "../objects/Program";
+import { Program } from "../../objects/Program";
 
 export class SubscriptionRouter extends ECSRouter {
 

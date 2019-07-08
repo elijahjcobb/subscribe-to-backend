@@ -34,10 +34,10 @@ import {
 } from "@elijahjcobb/server";
 import * as Express from "express";
 import {StandardType} from "typit";
-import {User, UserGender} from "../../objects/User";
-import {Session} from "../../session/Session";
-import {SessionValidator} from "../../session/SessionValidator";
-import {UserRouterSecurity} from "./UserRouterSecurity";
+import {User, UserGender} from "../../../../objects/User";
+import {Session} from "../../../../session/Session";
+import {SessionValidator} from "../../../../session/SessionValidator";
+import {UserRouterSecurity} from "./security/UserRouterSecurity";
 
 export class UserRouterAccount extends ECSRouter {
 

@@ -42,7 +42,7 @@ import { ECSQLCondition, ECSQLFilter, ECSQLFilterGroup, ECSQLOperator, ECSQLQuer
 import { ECArray } from "@elijahjcobb/collections";
 import { ECGBox, ECGDistance, ECGDistanceUnit, ECGPoint } from "@elijahjcobb/geo";
 import { isOpaqueType } from "@babel/types";
-import {BusinessRouterMe} from "./BusinessRouterMe";
+import {BusinessRouterMe} from "./me/BusinessRouterMe";
 
 type BusinessNear = BusinessProps & { distance: { readable: string, value: number }};
 

@@ -24,14 +24,14 @@
 
 import { ECSQLDatabase, ECSQLQuery, ECSQLInitObject } from "@elijahjcobb/nosql";
 import { ECSRequest, ECSServer } from "@elijahjcobb/server";
-import { UserRouter } from "./endpoints/User/UserRouter";
+import { UserRouter } from "./endpoints/user/UserRouter";
 import { Session } from "./session/Session";
-import { BusinessRouter } from "./endpoints/Business/BusinessRouter";
-import { ProductRouter } from "./endpoints/ProductRouter";
-import { FilesRouter } from "./endpoints/FilesRouter";
+import { BusinessRouter } from "./endpoints/business/BusinessRouter";
+import { ProductRouter } from "./endpoints/product/ProductRouter";
+import { FilesRouter } from "./endpoints/files/FilesRouter";
 import * as FileSystem from "fs";
-import { ProgramRouter } from "./endpoints/ProgramRouter";
-import { SubscriptionRouter } from "./endpoints/SubscriptionRouter";
+import { ProgramRouter } from "./endpoints/program/ProgramRouter";
+import { SubscriptionRouter } from "./endpoints/subscription/SubscriptionRouter";
 import { Encryption } from "./session/Encryption";
 
 let databaseConfig: ECSQLInitObject;

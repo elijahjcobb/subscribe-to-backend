@@ -33,13 +33,13 @@ import {
 	ECSValidator
 } from "@elijahjcobb/server";
 import * as Express from "express";
-import {SessionValidator} from "../session/SessionValidator";
+import {SessionValidator} from "../../session/SessionValidator";
 import {StandardType} from "typit";
-import {Session} from "../session/Session";
-import {Business} from "../objects/Business";
-import {Product} from "../objects/Product";
+import {Session} from "../../session/Session";
+import {Business} from "../../objects/Business";
+import {Product} from "../../objects/Product";
 import {ECSQLCondition, ECSQLFilter, ECSQLFilterGroup, ECSQLOperator, ECSQLQuery} from "@elijahjcobb/nosql";
-import {Program, ProgramProps} from "../objects/Program";
+import {Program, ProgramProps} from "../../objects/Program";
 import {ECArray} from "@elijahjcobb/collections";
 
 export class ProgramRouter extends ECSRouter {

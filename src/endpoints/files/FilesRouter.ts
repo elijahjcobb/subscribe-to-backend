@@ -24,7 +24,7 @@
 
 import { ECSError, ECSRequest, ECSRequestType, ECSResponse, ECSRoute, ECSRouter } from "@elijahjcobb/server";
 import * as Express from "express";
-import { Files } from "../files/Files";
+import { Files } from "../../files/Files";
 
 export class FilesRouter extends ECSRouter {
 

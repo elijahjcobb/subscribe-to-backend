@@ -22,18 +22,17 @@
  *
  */
 
-import { ECSRouter }from "@elijahjcobb/server";
+import { ECSRouter } from "@elijahjcobb/server";
 import * as Express from "express";
-import {UserRouterAuth} from "./UserRouterAuth";
-import {UserRouterMe} from "./UserRouterMe";
+import { UserRouterAuthSignUp } from "./sign-up/UserRouterAuthSignUp";
+import { UserRouterAuthSignIn } from "./sign-in/UserRouterAuthSignIn";
 
-export class UserRouter extends ECSRouter {
-
+export class UserRouterAuth extends ECSRouter {
 
 	public getRouter(): Express.Router {
 
-		this.use("/me", new UserRouterMe());
-		this.use("/auth", new UserRouterAuth());
+		this.use("/sign-up", new UserRouterAuthSignUp());
+		this.use("/sign-in", new UserRouterAuthSignIn());
 
 		return this.createRouter();
 
