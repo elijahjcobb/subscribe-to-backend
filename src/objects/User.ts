@@ -22,14 +22,21 @@
  *
  */
 
-import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
-import { ECErrorOriginType, ECErrorStack, ECErrorType } from "@elijahjcobb/error";
-import { ECGenerator, ECHash } from "@elijahjcobb/encryption";
-import { Session } from "../session/Session";
-import { ECSQLFilteredJSON } from "@elijahjcobb/nosql/dist/object/ECSQLObject";
-import { TOTP } from "../session/TOTP";
-import { TFAToken } from "../session/TFA";
-import { ECSError } from "@elijahjcobb/server";
+import {
+	ECSQLCondition,
+	ECSQLFilter,
+	ECSQLFilterGroup,
+	ECSQLObject,
+	ECSQLOperator,
+	ECSQLQuery
+} from "@elijahjcobb/nosql";
+import {ECErrorOriginType, ECErrorStack, ECErrorType} from "@elijahjcobb/error";
+import {ECGenerator, ECHash} from "@elijahjcobb/encryption";
+import {Session, SessionProps} from "../session/Session";
+import {ECSQLFilteredJSON} from "@elijahjcobb/nosql/dist/object/ECSQLObject";
+import {TOTP} from "../session/TOTP";
+import {TFAToken} from "../session/TFA";
+import {ECSError} from "@elijahjcobb/server";
 
 export enum UserGender {
 	Male,
@@ -144,6 +151,27 @@ export class User extends ECSQLObject<UserProps> {
 
 		if (this.props.salt === undefined || this.props.pepper === undefined) return false;
 		return this.props.pepper.equals(User.createPepper(this.props.salt, password));
+
+	}
+
+	public async signOutOfAllSessions(): Promise<void> {
+
+		if (this.id === undefined) {
+			throw ECSError.init().msg("Tried to sign out of all sessions for a user who hasn't been created.");
+		}
+
+		const query: ECSQLQuery<Session, SessionProps> = new ECSQLQuery(Session, new ECSQLFilterGroup(
+			ECSQLCondition.And,
+			new ECSQLFilter("userId", ECSQLOperator.Equal, this.id),
+			new ECSQLFilter("dead", ECSQLOperator.Equal, 0),
+		));
+
+		await (await query.getAllObjects()).forEachSync(async (session: Session): Promise<void> => {
+
+			session.props.dead = true;
+			await session.updateProps("dead");
+
+		});
 
 	}
 
