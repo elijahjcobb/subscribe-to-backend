@@ -22,7 +22,9 @@
  *
  */
 
-import { ECMObject } from "@elijahjcobb/maria";
+import {ECMObject, ECMQuery} from "@elijahjcobb/maria";
+import {ECArray} from "@elijahjcobb/collections";
+import {ECSQLCMD} from "@elijahjcobb/sql-cmd";
 
 export interface SubscriptionProps {
 	userId: string;
@@ -41,6 +43,50 @@ export class Subscription extends ECMObject<SubscriptionProps> {
 			programId: "string",
 			autoRenew: "boolean"
 		});
+
+	}
+
+	public static getAllForUser(userId: string): Promise<ECArray<Subscription>> {
+
+		let query: ECMQuery<Subscription, SubscriptionProps> = new ECMQuery(Subscription, ECSQLCMD
+			.select()
+			.where("userId", "=", userId)
+		);
+
+		return query.getAllObjects();
+
+	}
+
+	public static getAllForBusiness(businessId: string): Promise<ECArray<Subscription>> {
+
+		let query: ECMQuery<Subscription, SubscriptionProps> = new ECMQuery(Subscription, ECSQLCMD
+			.select()
+			.where("businessId", "=", businessId)
+		);
+
+		return query.getAllObjects();
+
+	}
+
+	public static getAllForProgram(programId: string): Promise<ECArray<Subscription>> {
+
+		let query: ECMQuery<Subscription, SubscriptionProps> = new ECMQuery(Subscription, ECSQLCMD
+			.select()
+			.where("programId", "=", programId)
+		);
+
+		return query.getAllObjects();
+
+	}
+
+	public static getAllForProduct(productId: string): Promise<ECArray<Subscription>> {
+
+		let query: ECMQuery<Subscription, SubscriptionProps> = new ECMQuery(Subscription, ECSQLCMD
+			.select()
+			.whereKeyIsValueOfQuery("id", "program", "productId", productId)
+		);
+
+		return query.getAllObjects();
 
 	}
 

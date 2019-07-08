@@ -41,6 +41,8 @@ import { User } from "../../objects/User";
 import { Business } from "../../objects/Business";
 import { ECMQuery } from "@elijahjcobb/maria";
 import { Program } from "../../objects/Program";
+import {ECArray} from "@elijahjcobb/collections";
+import {Product} from "../../objects/Product";
 
 export class SubscriptionRouter extends ECSRouter {
 
@@ -95,31 +97,76 @@ export class SubscriptionRouter extends ECSRouter {
 
 	public async handleGetAllForUser(req: ECSRequest): Promise<ECSResponse> {
 
-		throw ECSError.init().code(501).show().msg("Will be implemented soon.");
+		const session: Session = req.getSession();
+		const user: User = await session.getUser();
+		const subscriptions: ECArray<Subscription> = await Subscription.getAllForUser(user.id as string);
+
+		return new ECSResponse(subscriptions.map((subscription: Subscription) => {
+
+			return subscription.getJSON();
+
+		}).toNativeArray());
 
 	}
 
 	public async handleGetAllForBusiness(req: ECSRequest): Promise<ECSResponse> {
 
-		throw ECSError.init().code(501).show().msg("Will be implemented soon.");
+		const session: Session = req.getSession();
+		const business: Business = await session.getBusiness();
+		const subscriptions: ECArray<Subscription> = await Subscription.getAllForBusiness(business.id as string);
+
+		return new ECSResponse(subscriptions.map((subscription: Subscription) => {
+
+			return subscription.getJSON();
+
+		}).toNativeArray());
 
 	}
 
 	public async handleGetAllForProgram(req: ECSRequest): Promise<ECSResponse> {
 
-		throw ECSError.init().code(501).show().msg("Will be implemented soon.");
+		const session: Session = req.getSession();
+		const business: Business = await session.getBusiness();
+		const programId: string = req.getParameters().get("id") as string;
+		const program: Program =  await ECMQuery.getObjectWithId(Program, programId);
+		if (program.props.businessId !== business.id) throw ECSError.init().show().code(401);
+		const subscriptions: ECArray<Subscription> = await Subscription.getAllForProgram(programId);
+
+		return new ECSResponse(subscriptions.map((subscription: Subscription) => {
+
+			return subscription.getJSON();
+
+		}).toNativeArray());
 
 	}
 
 	public async handleGetAllForProduct(req: ECSRequest): Promise<ECSResponse> {
 
-		throw ECSError.init().code(501).show().msg("Will be implemented soon.");
+		const session: Session = req.getSession();
+		const business: Business = await session.getBusiness();
+		const productId: string = req.getParameters().get("id") as string;
+		const product: Product =  await ECMQuery.getObjectWithId(Product, productId);
+		if (product.props.businessId !== business.id) throw ECSError.init().show().code(401);
+		const subscriptions: ECArray<Subscription> = await Subscription.getAllForProduct(productId);
+
+		return new ECSResponse(subscriptions.map((subscription: Subscription) => {
+
+			return subscription.getJSON();
+
+		}).toNativeArray());
 
 	}
 
 	public async handleGet(req: ECSRequest): Promise<ECSResponse> {
 
-		throw ECSError.init().code(501).show().msg("Will be implemented soon.");
+		const session: Session = req.getSession();
+		const subscriptionId: string = req.getParameters().get("id") as string;
+		const subscription: Subscription = await ECMQuery.getObjectWithId(Subscription, subscriptionId);
+		if (subscription.props.businessId !== session.props.businessId
+			||
+			subscription.props.userId !== session.props.userId) throw ECSError.init().show().code(401);
+
+		return new ECSResponse(subscription.getJSON());
 
 	}
 
