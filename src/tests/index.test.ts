@@ -22,18 +22,18 @@
  *
  */
 
-import { User, UserGender, UserProps } from "../objects/User";
-import { ECSQLDatabase } from "@elijahjcobb/nosql";
-
-ECSQLDatabase.init({
-	database: "subscribeto",
-	verbose: true
-});
-
-describe("User", () => {
-
-	test("Sign Up", async () => {
-
-	});
-
-});
+// import { User, UserGender, UserProps } from "../objects/User";
+// import { ECSQLDatabase } from "@elijahjcobb/maria";
+//
+// ECSQLDatabase.init({
+// 	database: "subscribeto",
+// 	verbose: true
+// });
+//
+// describe("User", () => {
+//
+// 	test("Sign Up", async () => {
+//
+// 	});
+//
+// });
