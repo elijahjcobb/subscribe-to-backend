@@ -22,7 +22,7 @@
  *
  */
 
-import { ECSQLDatabase, ECSQLQuery, ECSQLInitObject } from "@elijahjcobb/nosql";
+import { ECMDatabase, ECMQuery, ECMInitObject } from "@elijahjcobb/maria";
 import { ECSRequest, ECSServer } from "@elijahjcobb/server";
 import { UserRouter } from "./endpoints/user/UserRouter";
 import { Session } from "./session/Session";
@@ -35,7 +35,7 @@ import { SubscriptionRouter } from "./endpoints/subscription/SubscriptionRouter"
 import { Encryption } from "./session/Encryption";
 import {AdminRouter} from "./endpoints/admin/AdminRouter";
 
-let databaseConfig: ECSQLInitObject;
+let databaseConfig: ECMInitObject;
 let port: number;
 
 if (process.env.USER === "elijahcobb") {
@@ -81,7 +81,7 @@ if (process.env.USER === "elijahcobb") {
 
 }
 
-ECSQLDatabase.init(databaseConfig);
+ECMDatabase.init(databaseConfig);
 
 let server: ECSServer = new ECSServer();
 
@@ -94,7 +94,7 @@ server.setAuthorizationMiddleware(async(req: ECSRequest): Promise<ECSRequest> =>
 	const sessionId: string = authSplit[1];
 	if (!sessionId) return req;
 
-	const session: Session | undefined = await ECSQLQuery.getObjectWithId(Session, sessionId, true);
+	const session: Session | undefined = await ECMQuery.getObjectWithId(Session, sessionId, true);
 	if (!session) return req;
 
 	req.setSession(session);
