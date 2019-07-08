@@ -33,6 +33,7 @@ import * as FileSystem from "fs";
 import { ProgramRouter } from "./endpoints/program/ProgramRouter";
 import { SubscriptionRouter } from "./endpoints/subscription/SubscriptionRouter";
 import { Encryption } from "./session/Encryption";
+import {AdminRouter} from "./endpoints/admin/AdminRouter";
 
 let databaseConfig: ECSQLInitObject;
 let port: number;
@@ -107,5 +108,6 @@ server.use("/product", new ProductRouter());
 server.use("/program", new ProgramRouter());
 server.use("/subscription", new SubscriptionRouter());
 server.use("/files", new FilesRouter());
+server.use("/admin", new AdminRouter());
 
 server.startHTTP(port);

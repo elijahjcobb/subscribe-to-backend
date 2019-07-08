@@ -30,6 +30,7 @@ import { Business } from "../objects/Business";
 export interface SessionProps {
 	userId: string;
 	businessId: string;
+	dead: boolean;
 }
 
 export class Session extends ECSQLObject<SessionProps> {
@@ -38,7 +39,8 @@ export class Session extends ECSQLObject<SessionProps> {
 
 		super("session", {
 			userId: "string",
-			businessId: "string"
+			businessId: "string",
+			dead: "boolean"
 		});
 
 	}
