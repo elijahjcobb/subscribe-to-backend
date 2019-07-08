@@ -25,30 +25,27 @@
 import {ECSRequest, ECSRequestType, ECSResponse, ECSRoute, ECSRouter, ECSValidator} from "@elijahjcobb/server";
 import * as Express from "express";
 import {SessionValidator} from "../../session/SessionValidator";
-import {ECSQLCondition, ECSQLFilter, ECSQLFilterGroup, ECSQLOperator, ECSQLQuery} from "@elijahjcobb/nosql";
+import {ECMQuery} from "@elijahjcobb/maria";
 import {Session, SessionProps} from "../../session/Session";
 import {ECArray, ECMap} from "@elijahjcobb/collections";
 import {User} from "../../objects/User";
+import {ECSQLCMD, ECSQLCMDQuery} from "@elijahjcobb/sql-cmd";
 
 export class AdminRouter extends ECSRouter {
 
 	private async handleGetAllForUser(req: ECSRequest): Promise<ECSResponse> {
 
 		const userId: string = req.getParameters().get("id") as string;
-
-		const query: ECSQLQuery<Session, SessionProps> = new ECSQLQuery(Session, new ECSQLFilterGroup(
-			ECSQLCondition.And,
-			new ECSQLFilter(
-				"userId",
-				ECSQLOperator.Equal,
-				userId
-			),
-			new ECSQLFilter(
-				"dead",
-				ECSQLOperator.Equal,
-				0
-			)
-		));
+		const query: ECMQuery<Session, SessionProps> = new ECMQuery(Session,
+			ECSQLCMD
+				.select()
+				.whereThese(
+					ECSQLCMDQuery
+						.and()
+						.where("userId", "=", userId)
+						.where("dead", "=", false)
+				)
+		);
 
 		const sessions: ECArray<Session> = await query.getAllObjects();
 		const formattedSessions: ECArray<object> = sessions.map((session: Session): object => {
@@ -65,19 +62,14 @@ export class AdminRouter extends ECSRouter {
 
 		const businessId: string = req.getParameters().get("id") as string;
 
-		const query: ECSQLQuery<Session, SessionProps> = new ECSQLQuery(Session, new ECSQLFilterGroup(
-			ECSQLCondition.And,
-			new ECSQLFilter(
-				"businessId",
-				ECSQLOperator.Equal,
-				businessId
-			),
-			new ECSQLFilter(
-				"dead",
-				ECSQLOperator.Equal,
-				0
+		const query: ECMQuery<Session, SessionProps> = new ECMQuery(Session, ECSQLCMD
+			.select()
+			.whereThese(
+				ECSQLCMDQuery.and()
+					.where("businessId", "=", businessId)
+					.where("dead", "=", false)
 			)
-		));
+		);
 
 		const map: ECMap<string, object[] | undefined> = new ECMap<string, object[] | undefined>();
 		(await query.getAllObjects()).forEach((session: Session) => {
@@ -96,7 +88,7 @@ export class AdminRouter extends ECSRouter {
 
 	private async handleCreateNewUserToken(req: ECSRequest): Promise<ECSResponse> {
 
-		const user: User = await ECSQLQuery.getObjectWithId(User, req.getParameters().get("id") as string);
+		const user: User = await ECMQuery.getObjectWithId(User, req.getParameters().get("id") as string);
 
 		const session: Session = new Session();
 		session.props.userId = user.id;
@@ -130,7 +122,7 @@ export class AdminRouter extends ECSRouter {
 	private async handleDeleteSession(req: ECSRequest): Promise<ECSResponse> {
 
 		const sessionId: string = req.getParameters().get("id") as string;
-		const session: Session = await ECSQLQuery.getObjectWithId(Session, sessionId);
+		const session: Session = await ECMQuery.getObjectWithId(Session, sessionId);
 
 		session.props.dead = true;
 		await session.updateProps("dead");
@@ -142,7 +134,7 @@ export class AdminRouter extends ECSRouter {
 	private async handleKillAllUser(req: ECSRequest): Promise<ECSResponse> {
 
 		const userId: string = req.getParameters().get("id") as string;
-		const user: User = await ECSQLQuery.getObjectWithId(User, userId);
+		const user: User = await ECMQuery.getObjectWithId(User, userId);
 
 		await user.signOutOfAllSessions();
 

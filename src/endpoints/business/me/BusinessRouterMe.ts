@@ -23,7 +23,6 @@
  */
 
 import {
-	ECSError,
 	ECSRequest,
 	ECSRequestType,
 	ECSResponse,
@@ -34,14 +33,9 @@ import {
 } from "@elijahjcobb/server";
 import * as Express from "express";
 import { SessionValidator } from "../../../session/SessionValidator";
-import { OptionalType, StandardType } from "typit";
+import { StandardType } from "typit";
 import { Session } from "../../../session/Session";
-import { BusinessOwner } from "../../../objects/BusinessOwner";
-import { Business, BusinessProps } from "../../../objects/Business";
-import { ECSQLCondition, ECSQLFilter, ECSQLFilterGroup, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
-import { ECArray } from "@elijahjcobb/collections";
-import { ECGBox, ECGDistance, ECGDistanceUnit, ECGPoint } from "@elijahjcobb/geo";
-import { isOpaqueType } from "@babel/types";
+import { Business } from "../../../objects/Business";
 
 export class BusinessRouterMe extends ECSRouter {
 

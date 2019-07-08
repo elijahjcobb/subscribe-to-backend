@@ -22,13 +22,13 @@
  *
  */
 
-import { ECSQLObject } from "@elijahjcobb/nosql";
+import {ECMObject} from "@elijahjcobb/maria";
 
 export interface ReceiptProps {
 	subscriptionId: string;
 }
 
-export class Receipt extends ECSQLObject<ReceiptProps> {
+export class Receipt extends ECMObject<ReceiptProps> {
 
 	public constructor() {
 

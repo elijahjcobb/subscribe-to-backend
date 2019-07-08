@@ -22,18 +22,12 @@
  *
  */
 
-import {
-	ECSQLCondition,
-	ECSQLFilter,
-	ECSQLFilterGroup,
-	ECSQLObject,
-	ECSQLOperator,
-	ECSQLQuery
-} from "@elijahjcobb/nosql";
+import {ECMObject, ECMQuery} from "@elijahjcobb/maria";
 import { ECArray } from "@elijahjcobb/collections";
 import { Product, ProductProps } from "./Product";
 import { ECSError } from "@elijahjcobb/server";
 import { Program, ProgramProps } from "./Program";
+import {ECSQLCMD, ECSQLCMDQuery} from "@elijahjcobb/sql-cmd";
 
 export interface BusinessProps {
 	name: string;
@@ -41,7 +35,7 @@ export interface BusinessProps {
 	lng: number;
 }
 
-export class Business extends ECSQLObject<BusinessProps> {
+export class Business extends ECMObject<BusinessProps> {
 
 	public constructor() {
 
@@ -61,9 +55,9 @@ export class Business extends ECSQLObject<BusinessProps> {
 				.msg("You cannot get products for a business that hasn't been created.");
 		}
 
-		const query: ECSQLQuery<Product, ProductProps> = new ECSQLQuery(
+		const query: ECMQuery<Product, ProductProps> = new ECMQuery(
 			Product,
-			new ECSQLFilter("businessId", ECSQLOperator.Equal, this.id)
+			ECSQLCMD.select().where("businessId", "=", this.id)
 		);
 
 		return await query.getAllObjects();
@@ -78,9 +72,9 @@ export class Business extends ECSQLObject<BusinessProps> {
 				.msg("You cannot get programs for a business that hasn't been created.");
 		}
 
-		const query: ECSQLQuery<Program, ProgramProps> = new ECSQLQuery(
+		const query: ECMQuery<Program, ProgramProps> = new ECMQuery(
 			Program,
-			new ECSQLFilter("businessId", ECSQLOperator.Equal, this.id)
+			ECSQLCMD.select().where("businessId", "=", this.id)
 		);
 
 		return await query.getAllObjects();
@@ -95,13 +89,16 @@ export class Business extends ECSQLObject<BusinessProps> {
 				.msg("You cannot get programs for a business that hasn't been created.");
 		}
 
-		const query: ECSQLQuery<Program, ProgramProps> = new ECSQLQuery(
+		const query: ECMQuery<Program, ProgramProps> = new ECMQuery(
 			Program,
-			new ECSQLFilterGroup(
-				ECSQLCondition.And,
-				new ECSQLFilter("businessId", ECSQLOperator.Equal, this.id),
-				new ECSQLFilter("closed", ECSQLOperator.Equal, closed)
-			)
+			ECSQLCMD
+				.select()
+				.whereThese(
+					ECSQLCMDQuery
+						.and()
+						.where("businessId", "=", this.id)
+						.where("closed", "=", closed)
+				)
 		);
 
 		return await query.getAllObjects();

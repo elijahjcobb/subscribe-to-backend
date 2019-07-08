@@ -38,9 +38,10 @@ import {StandardType} from "typit";
 import {Session} from "../../session/Session";
 import {Business} from "../../objects/Business";
 import {Product} from "../../objects/Product";
-import {ECSQLCondition, ECSQLFilter, ECSQLFilterGroup, ECSQLOperator, ECSQLQuery} from "@elijahjcobb/nosql";
+import { ECMQuery } from "@elijahjcobb/maria";
 import {Program, ProgramProps} from "../../objects/Program";
 import {ECArray} from "@elijahjcobb/collections";
+import {ECSQLCMD, ECSQLCMDQuery} from "@elijahjcobb/sql-cmd";
 
 export class ProgramRouter extends ECSRouter {
 
@@ -51,7 +52,7 @@ export class ProgramRouter extends ECSRouter {
 		const price: number = req.get("price");
 		const allowance: number = req.get("allowance");
 		const business: Business = await session.getBusiness();
-		const product: Product = await ECSQLQuery.getObjectWithId(Product, productId);
+		const product: Product = await ECMQuery.getObjectWithId(Product, productId);
 
 		const program: Program = new Program();
 		program.props.productId = product.id;
@@ -68,7 +69,7 @@ export class ProgramRouter extends ECSRouter {
 	public async handleGetSingular(req: ECSRequest): Promise<ECSResponse> {
 
 		const programId: string = req.getParameters().get("id") as string;
-		const program: Program = await ECSQLQuery.getObjectWithId(Program, programId);
+		const program: Program = await ECMQuery.getObjectWithId(Program, programId);
 
 
 		return new ECSResponse(program.getJSON());
@@ -80,13 +81,15 @@ export class ProgramRouter extends ECSRouter {
 		const closed: boolean = req.getEndpoint().indexOf("closed") !== -1;
 
 		const businessId: string = req.getParameters().get("id") as string;
-		const business: Business = await ECSQLQuery.getObjectWithId(Business, businessId);
-		const query: ECSQLQuery<Program, ProgramProps> = new ECSQLQuery(
-			Program,
-			new ECSQLFilterGroup(
-				ECSQLCondition.And,
-				new ECSQLFilter("businessId", ECSQLOperator.Equal, business.id as string),
-				new ECSQLFilter("closed", ECSQLOperator.Equal, closed),
+		const business: Business = await ECMQuery.getObjectWithId(Business, businessId);
+
+		const query: ECMQuery<Program, ProgramProps> = new ECMQuery(Program, ECSQLCMD
+			.select()
+			.whereThese(
+				ECSQLCMDQuery
+					.and()
+					.where("businessId", "=", business.id as string)
+					.where("closed", "=", closed)
 			)
 		);
 
@@ -103,7 +106,7 @@ export class ProgramRouter extends ECSRouter {
 	public async handleGetAllForProduct(req: ECSRequest): Promise<ECSResponse> {
 
 		const productId: string = req.getParameters().get("id") as string;
-		const product: Product = await ECSQLQuery.getObjectWithId(Product, productId);
+		const product: Product = await ECMQuery.getObjectWithId(Product, productId);
 		const programs: ECArray<Program> = await product.getAllPrograms();
 
 		return new ECSResponse(programs.map((program: Program) => {
@@ -117,7 +120,7 @@ export class ProgramRouter extends ECSRouter {
 	public async handleUpdatePrice(req: ECSRequest): Promise<ECSResponse> {
 
 		const oldProgramId: string = req.getParameters().get("id") as string;
-		const oldProgram: Program = await ECSQLQuery.getObjectWithId(Program, oldProgramId);
+		const oldProgram: Program = await ECMQuery.getObjectWithId(Program, oldProgramId);
 
 		const price: number = req.get("value");
 		if (price <= 0) {
@@ -156,7 +159,7 @@ export class ProgramRouter extends ECSRouter {
 	public async handleUpdateAllowance(req: ECSRequest): Promise<ECSResponse> {
 
 		const oldProgramId: string = req.getParameters().get("id") as string;
-		const oldProgram: Program = await ECSQLQuery.getObjectWithId(Program, oldProgramId);
+		const oldProgram: Program = await ECMQuery.getObjectWithId(Program, oldProgramId);
 
 		const allowance: number = req.get("value");
 
@@ -197,7 +200,7 @@ export class ProgramRouter extends ECSRouter {
 	public async handleDelete(req: ECSRequest): Promise<ECSResponse> {
 
 		const id: string = req.getParameters().get("id") as string;
-		const program: Program = await ECSQLQuery.getObjectWithId(Program, id);
+		const program: Program = await ECMQuery.getObjectWithId(Program, id);
 
 		program.props.closed = true;
 		await program.updateProps("closed");

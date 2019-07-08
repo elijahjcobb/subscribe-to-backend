@@ -38,7 +38,7 @@ import { StandardType, OptionalType } from "typit";
 import { Session } from "../../session/Session";
 import { Product } from "../../objects/Product";
 import { Files } from "../../files/Files";
-import {ECSQLQuery} from "@elijahjcobb/nosql";
+import { ECMQuery } from "@elijahjcobb/maria";
 import { Business } from "../../objects/Business";
 import { ECArray } from "@elijahjcobb/collections";
 
@@ -83,7 +83,7 @@ export class ProductRouter extends ECSRouter {
 	public async handleGet(req: ECSRequest): Promise<ECSResponse> {
 
 		const id: string = req.getParameters().get("id") as string;
-		const product: Product = await ECSQLQuery.getObjectWithId(Product, id);
+		const product: Product = await ECMQuery.getObjectWithId(Product, id);
 
 		return new ECSResponse(product.getJSON());
 
@@ -92,7 +92,7 @@ export class ProductRouter extends ECSRouter {
 	public async handleGetAllForBusiness(req: ECSRequest): Promise<ECSResponse> {
 
 		const businessId: string = req.getParameters().get("id") as string;
-		const business: Business = await ECSQLQuery.getObjectWithId(Business, businessId);
+		const business: Business = await ECMQuery.getObjectWithId(Business, businessId);
 		const products: ECArray<Product> = await business.getAllProducts();
 
 		return new ECSResponse(products.map((product: Product) => {
@@ -109,7 +109,7 @@ export class ProductRouter extends ECSRouter {
 		const id: string = req.getParameters().get("id") as string;
 		const name: string = req.get("name");
 
-		const product: Product = await ECSQLQuery.getObjectWithId(Product, id);
+		const product: Product = await ECMQuery.getObjectWithId(Product, id);
 		product.props.name = name;
 		await product.updateProps("name");
 
@@ -122,7 +122,7 @@ export class ProductRouter extends ECSRouter {
 		const id: string = req.getParameters().get("id") as string;
 		const description: string = req.get("description");
 
-		const product: Product = await ECSQLQuery.getObjectWithId(Product, id);
+		const product: Product = await ECMQuery.getObjectWithId(Product, id);
 		product.props.description = description;
 		await product.updateProps("description");
 
@@ -151,7 +151,7 @@ export class ProductRouter extends ECSRouter {
 
 		}
 
-		const product: Product = await ECSQLQuery.getObjectWithId(Product, id);
+		const product: Product = await ECMQuery.getObjectWithId(Product, id);
 		Files.saveFile(product, imageData);
 
 		return new ECSResponse(product.getJSON());

@@ -22,7 +22,7 @@
  *
  */
 
-import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
+import {ECMObject, ECMQuery} from "@elijahjcobb/maria";
 import { User } from "../objects/User";
 import { Admin, AdminProps } from "./Admin";
 import { Business } from "../objects/Business";
@@ -33,7 +33,7 @@ export interface SessionProps {
 	dead: boolean;
 }
 
-export class Session extends ECSQLObject<SessionProps> {
+export class Session extends ECMObject<SessionProps> {
 
 	public constructor() {
 
@@ -48,14 +48,14 @@ export class Session extends ECSQLObject<SessionProps> {
 	public async getUser(): Promise<User> {
 
 		if (this.props.userId === undefined) throw Error("Attempted to fetch user for session when session does not have userId.");
-		return await ECSQLQuery.getObjectWithId(User, this.props.userId);
+		return await ECMQuery.getObjectWithId(User, this.props.userId);
 
 	}
 
 	public async getBusiness(): Promise<Business> {
 
 		if (this.props.businessId === undefined) throw Error("Attempted to fetch business for session when session does not have businessId.");
-		return await ECSQLQuery.getObjectWithId(Business, this.props.businessId);
+		return await ECMQuery.getObjectWithId(Business, this.props.businessId);
 
 	}
 
@@ -63,7 +63,7 @@ export class Session extends ECSQLObject<SessionProps> {
 
 		if (!this.props.userId) return false;
 
-		let admin: Admin | undefined = await ECSQLQuery.getObjectWithId(Admin, this.props.userId, true);
+		let admin: Admin | undefined = await ECMQuery.getObjectWithId(Admin, this.props.userId, true);
 
 		return admin !== undefined;
 

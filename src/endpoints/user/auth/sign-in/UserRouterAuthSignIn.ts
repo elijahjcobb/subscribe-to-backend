@@ -36,7 +36,7 @@ import * as Express from "express";
 import { StandardType} from "typit";
 import {User} from "../../../../objects/User";
 import {Session} from "../../../../session/Session";
-import {ECSQLQuery} from "@elijahjcobb/nosql";
+import {ECMQuery} from "@elijahjcobb/maria";
 import {TFAToken} from "../../../../session/TFA";
 import {Encryption} from "../../../../session/Encryption";
 
@@ -114,7 +114,7 @@ export class UserRouterAuthSignIn extends ECSRouter {
 
 		}
 
-		const user: User = await ECSQLQuery.getObjectWithId(User, id);
+		const user: User = await ECMQuery.getObjectWithId(User, id);
 
 		if (!user.usesTFATOTP()) {
 			throw ECSError
@@ -152,7 +152,7 @@ export class UserRouterAuthSignIn extends ECSRouter {
 				.show();
 		}
 
-		const user: User = await ECSQLQuery.getObjectWithId(User, token.data);
+		const user: User = await ECMQuery.getObjectWithId(User, token.data);
 		const session: Session = await user.getNewSession();
 
 		return new ECSResponse({ token: session.id, type: "session" });

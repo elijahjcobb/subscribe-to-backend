@@ -38,11 +38,11 @@ import { OptionalType, StandardType } from "typit";
 import { Session } from "../../session/Session";
 import { BusinessOwner } from "../../objects/BusinessOwner";
 import { Business, BusinessProps } from "../../objects/Business";
-import { ECSQLCondition, ECSQLFilter, ECSQLFilterGroup, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
+import {ECMQuery} from "@elijahjcobb/maria";
 import { ECArray } from "@elijahjcobb/collections";
 import { ECGBox, ECGDistance, ECGDistanceUnit, ECGPoint } from "@elijahjcobb/geo";
-import { isOpaqueType } from "@babel/types";
 import {BusinessRouterMe} from "./me/BusinessRouterMe";
+import {ECSQLCMD, ECSQLCMDQuery} from "@elijahjcobb/sql-cmd";
 
 type BusinessNear = BusinessProps & { distance: { readable: string, value: number }};
 
@@ -85,7 +85,7 @@ export class BusinessRouter extends ECSRouter {
 	public async handleGet(req: ECSRequest): Promise<ECSResponse> {
 
 		const id: string = req.getParameters().get("id") as string;
-		const business: Business | undefined = await ECSQLQuery.getObjectWithId(Business, id, true);
+		const business: Business | undefined = await ECMQuery.getObjectWithId(Business, id, true);
 
 		if (!business) {
 			throw ECSError
@@ -101,7 +101,7 @@ export class BusinessRouter extends ECSRouter {
 
 	public async handleGetAll(req: ECSRequest): Promise<ECSResponse> {
 
-		const query: ECSQLQuery<Business, BusinessProps> = new ECSQLQuery(Business);
+		const query: ECMQuery<Business, BusinessProps> = new ECMQuery(Business, ECSQLCMD.select());
 		const businesses: ECArray<Business> = await query.getAllObjects();
 		const formattedBusinesses: ECArray<object> = businesses.map((business: Business) => { return business.getJSON(); });
 
@@ -117,14 +117,18 @@ export class BusinessRouter extends ECSRouter {
 		const point: ECGPoint = new ECGPoint(lat, lng);
 		const box: ECGBox = point.findBoxWithRadius(new ECGDistance(radius, ECGDistanceUnit.Miles));
 
-		const query: ECSQLQuery<Business, BusinessProps> = new ECSQLQuery(Business, new ECSQLFilterGroup(
-			ECSQLCondition.And,
-			new ECSQLFilter("lat", ECSQLOperator.LessThanOrEqual, box.topLeft.lat),
-			new ECSQLFilter("lat", ECSQLOperator.GreaterThanOrEqual, box.bottomLeft.lat),
-			new ECSQLFilter("lng", ECSQLOperator.GreaterThanOrEqual, box.topLeft.lng),
-			new ECSQLFilter("lng", ECSQLOperator.LessThanOrEqual, box.topRight.lng)
-		));
-		query.setLimit(40);
+		const query: ECMQuery<Business, BusinessProps> = new ECMQuery(Business, ECSQLCMD
+			.select()
+			.whereThese(
+				ECSQLCMDQuery
+					.and()
+					.where("lat", "<=", box.topLeft.lat)
+					.where("lat", ">=", box.bottomLeft.lat)
+					.where("lng", ">=", box.topLeft.lat)
+					.where("lng", "<=", box.topRight.lat)
+			)
+			.limit(40)
+		);
 
 		const businesses: ECArray<Business> = await query.getAllObjects();
 		const formattedBusinesses: ECArray<object> = businesses.map((business: Business) => {

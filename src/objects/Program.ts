@@ -22,8 +22,9 @@
  *
  */
 
-import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
+import {ECMObject, ECMQuery} from "@elijahjcobb/maria";
 import { Subscription, SubscriptionProps } from "./Subscription";
+import {ECSQLCMD, ECSQLCMDQuery} from "@elijahjcobb/sql-cmd";
 
 export interface ProgramProps {
 	businessId: string;
@@ -34,7 +35,7 @@ export interface ProgramProps {
 	closed: boolean;
 }
 
-export class Program extends ECSQLObject<ProgramProps> {
+export class Program extends ECMObject<ProgramProps> {
 
 	public constructor() {
 
@@ -81,9 +82,11 @@ export class Program extends ECSQLObject<ProgramProps> {
 
 		if (this.id === undefined) return 0;
 
-		const query: ECSQLQuery<Subscription, SubscriptionProps> = new ECSQLQuery(
+		const query: ECMQuery<Subscription, SubscriptionProps> = new ECMQuery(
 			Subscription,
-			new ECSQLFilter("programId", ECSQLOperator.Equal, this.id)
+			ECSQLCMD
+				.select()
+				.where("programId", "=", this.id)
 		);
 
 		return await query.count();

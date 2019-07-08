@@ -22,11 +22,12 @@
  *
  */
 
-import { ECSQLFilter, ECSQLObject, ECSQLOperator, ECSQLQuery } from "@elijahjcobb/nosql";
+import {ECMObject, ECMQuery} from "@elijahjcobb/maria";
 import { Files } from "../files/Files";
 import { ECArray } from "@elijahjcobb/collections";
 import { Program, ProgramProps } from "./Program";
 import { ECSError } from "@elijahjcobb/server";
+import {ECSQLCMD} from "@elijahjcobb/sql-cmd";
 
 export interface ProductProps {
 	name: string;
@@ -34,7 +35,7 @@ export interface ProductProps {
 	businessId: string;
 }
 
-export class Product extends ECSQLObject<ProductProps> {
+export class Product extends ECMObject<ProductProps> {
 
 	public constructor() {
 
@@ -63,9 +64,11 @@ export class Product extends ECSQLObject<ProductProps> {
 				.msg("You cannot get programs for a product that hasn't been created.");
 		}
 
-		const query: ECSQLQuery<Program, ProgramProps> = new ECSQLQuery(
+		const query: ECMQuery<Program, ProgramProps> = new ECMQuery(
 			Program,
-			new ECSQLFilter("productId", ECSQLOperator.Equal, this.id)
+			ECSQLCMD
+				.select()
+				.where("productId", "=", this.id)
 		);
 
 		return await query.getAllObjects();

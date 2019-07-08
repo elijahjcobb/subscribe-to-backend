@@ -22,7 +22,7 @@
  *
  */
 
-import { ECSQLObject } from "@elijahjcobb/nosql";
+import { ECMObject } from "@elijahjcobb/maria";
 import { ECHash } from "@elijahjcobb/encryption";
 import * as FS from "fs";
 
@@ -30,7 +30,7 @@ export abstract class Files {
 
 	public static readonly rootDirectory: string = "/home/elijahcobb/Documents/subscribeto-storage";
 
-	public static getFileId(object: ECSQLObject<any>): string {
+	public static getFileId(object: ECMObject<any>): string {
 
 		const idPreHash: string = object.table + object.id;
 		const idPreHashData: Buffer = Buffer.from(idPreHash, "hex");
@@ -45,13 +45,13 @@ export abstract class Files {
 
 	}
 
-	public static getFilePathForObject(object: ECSQLObject<any>): string {
+	public static getFilePathForObject(object: ECMObject<any>): string {
 
 		return this.getFilePathForId(this.getFileId(object));
 
 	}
 
-	public static saveFile(object: ECSQLObject<any>, data: Buffer): string {
+	public static saveFile(object: ECMObject<any>, data: Buffer): string {
 
 		const newId: string = this.getFileId(object);
 		const filePath: string = this.getFilePathForId(newId);
@@ -68,14 +68,14 @@ export abstract class Files {
 
 	}
 
-	public static doesFileExistForObject(object: ECSQLObject<any>): boolean {
+	public static doesFileExistForObject(object: ECMObject<any>): boolean {
 
 		const filePath: string = this.getFilePathForObject(object);
 		return FS.existsSync(filePath);
 
 	}
 
-	public static getFileForObject(object: ECSQLObject<any>): Buffer | undefined {
+	public static getFileForObject(object: ECMObject<any>): Buffer | undefined {
 
 		if (!this.doesFileExistForObject(object)) return;
 		return FS.readFileSync(this.getFilePathForObject(object));
@@ -91,7 +91,7 @@ export abstract class Files {
 	}
 
 
-	public static getUrl(object: ECSQLObject<any>): string | undefined {
+	public static getUrl(object: ECMObject<any>): string | undefined {
 
 		if (this.doesFileExistForObject(object)) return;
 

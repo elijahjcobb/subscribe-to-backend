@@ -22,21 +22,14 @@
  *
  */
 
-import {
-	ECSQLCondition,
-	ECSQLFilter,
-	ECSQLFilterGroup,
-	ECSQLObject,
-	ECSQLOperator,
-	ECSQLQuery
-} from "@elijahjcobb/nosql";
+import {ECMFilteredJSON, ECMObject, ECMQuery} from "@elijahjcobb/maria";
 import {ECErrorOriginType, ECErrorStack, ECErrorType} from "@elijahjcobb/error";
 import {ECGenerator, ECHash} from "@elijahjcobb/encryption";
 import {Session, SessionProps} from "../session/Session";
-import {ECSQLFilteredJSON} from "@elijahjcobb/nosql/dist/object/ECSQLObject";
 import {TOTP} from "../session/TOTP";
 import {TFAToken} from "../session/TFA";
 import {ECSError} from "@elijahjcobb/server";
+import {ECSQLCMD, ECSQLCMDQuery} from "@elijahjcobb/sql-cmd";
 
 export enum UserGender {
 	Male,
@@ -68,7 +61,7 @@ export interface UserProps extends TestUser {
 	tfaSMSEnabled: boolean;
 }
 
-export class User extends ECSQLObject<UserProps> {
+export class User extends ECMObject<UserProps> {
 
 	public constructor() {
 
@@ -90,7 +83,7 @@ export class User extends ECSQLObject<UserProps> {
 
 	public getJSON(): object {
 
-		let obj: ECSQLFilteredJSON<UserProps> = this.getFilteredJSON(
+		let obj: ECMFilteredJSON<UserProps> = this.getFilteredJSON(
 			"id",
 			"email",
 			"firstName",
@@ -160,11 +153,16 @@ export class User extends ECSQLObject<UserProps> {
 			throw ECSError.init().msg("Tried to sign out of all sessions for a user who hasn't been created.");
 		}
 
-		const query: ECSQLQuery<Session, SessionProps> = new ECSQLQuery(Session, new ECSQLFilterGroup(
-			ECSQLCondition.And,
-			new ECSQLFilter("userId", ECSQLOperator.Equal, this.id),
-			new ECSQLFilter("dead", ECSQLOperator.Equal, 0),
-		));
+		const query: ECMQuery<Session, SessionProps> = new ECMQuery(Session,
+			ECSQLCMD
+				.select()
+				.whereThese(
+					ECSQLCMDQuery
+						.and()
+						.where("userId", "=", this.id)
+						.where("dead", "=", true)
+				)
+		);
 
 		await (await query.getAllObjects()).forEachSync(async (session: Session): Promise<void> => {
 
@@ -186,11 +184,11 @@ export class User extends ECSQLObject<UserProps> {
 
 	public static async doesUserExistForEmail(email: string): Promise<boolean> {
 
-		const query: ECSQLQuery<User, UserProps> = new ECSQLQuery(User, new ECSQLFilter(
-			"email",
-			ECSQLOperator.Equal,
-			email
-		));
+		const query: ECMQuery<User, UserProps> = new ECMQuery(User,
+			ECSQLCMD
+				.select()
+				.where("email", "=", email)
+		);
 
 		return query.exists();
 
@@ -258,8 +256,12 @@ export class User extends ECSQLObject<UserProps> {
 				new Error("A user does not exist for this email address."));
 		}
 
-		let query: ECSQLQuery<User, UserProps> = new ECSQLQuery(User, new ECSQLFilter("email", ECSQLOperator.Equal, email));
-		query.setLimit(1);
+		let query: ECMQuery<User, UserProps> = new ECMQuery(User,
+			ECSQLCMD
+				.select()
+				.where("email", "=", email)
+		);
+
 		let user: User = await query.getFirstObject();
 
 		const pepperProvided: Buffer = this.createPepper(user.props.salt as Buffer, password);

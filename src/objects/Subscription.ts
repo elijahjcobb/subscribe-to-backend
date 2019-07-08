@@ -22,7 +22,7 @@
  *
  */
 
-import { ECSQLObject } from "@elijahjcobb/nosql";
+import { ECMObject } from "@elijahjcobb/maria";
 
 export interface SubscriptionProps {
 	userId: string;
@@ -31,7 +31,7 @@ export interface SubscriptionProps {
 	autoRenew: boolean;
 }
 
-export class Subscription extends ECSQLObject<SubscriptionProps> {
+export class Subscription extends ECMObject<SubscriptionProps> {
 
 	public constructor() {
 

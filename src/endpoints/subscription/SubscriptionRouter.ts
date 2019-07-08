@@ -33,13 +33,13 @@ import {
 	ECSValidator
 } from "@elijahjcobb/server";
 import * as Express from "express";
-import { StandardType, OptionalType } from "typit";
+import { StandardType } from "typit";
 import { SessionValidator } from "../../session/SessionValidator";
 import { Subscription } from "../../objects/Subscription";
 import { Session } from "../../session/Session";
 import { User } from "../../objects/User";
 import { Business } from "../../objects/Business";
-import { ECSQLQuery } from "@elijahjcobb/nosql";
+import { ECMQuery } from "@elijahjcobb/maria";
 import { Program } from "../../objects/Program";
 
 export class SubscriptionRouter extends ECSRouter {
@@ -50,9 +50,9 @@ export class SubscriptionRouter extends ECSRouter {
 		const programId: string = req.get("programId");
 		const autoRenew: boolean = req.get("autoRenew");
 		const user: User = await session.getUser();
-		const program: Program = await ECSQLQuery.getObjectWithId(Program, programId);
+		const program: Program = await ECMQuery.getObjectWithId(Program, programId);
 		const businessId: string = program.props.businessId as string;
-		const business: Business = await ECSQLQuery.getObjectWithId(Business, businessId);
+		const business: Business = await ECMQuery.getObjectWithId(Business, businessId);
 
 		const subscription: Subscription = new Subscription();
 		subscription.props.businessId = business.id;
@@ -70,7 +70,7 @@ export class SubscriptionRouter extends ECSRouter {
 		const session: Session = req.getSession();
 		const user: User = await session.getUser();
 		const subscriptionId: string = req.getParameters().get("id") as string;
-		const subscription: Subscription = await ECSQLQuery.getObjectWithId(Subscription, subscriptionId);
+		const subscription: Subscription = await ECMQuery.getObjectWithId(Subscription, subscriptionId);
 
 		if (subscription.props.userId !== user.id) {
 			throw ECSError

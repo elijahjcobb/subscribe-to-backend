@@ -36,9 +36,8 @@ import * as Express from "express";
 import { StandardType} from "typit";
 import {User} from "../../../../objects/User";
 import {Session} from "../../../../session/Session";
-import {ECSQLQuery} from "@elijahjcobb/nosql";
 import {TFAToken} from "../../../../session/TFA";
-import {Encryption} from "../../../../session/Encryption";
+
 
 export class UserRouterAuthSignUp extends ECSRouter {
 

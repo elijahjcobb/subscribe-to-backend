@@ -10,10 +10,11 @@
 		"@elijahjcobb/encryption": "latest",
 		"@elijahjcobb/error": "latest",
 		"@elijahjcobb/geo": "latest",
-		"@elijahjcobb/nosql": "latest",
+		"@elijahjcobb/maria": "^0.1.1",
 		"@elijahjcobb/prototypes": "latest",
 		"@elijahjcobb/request": "latest",
 		"@elijahjcobb/server": "latest",
+		"@elijahjcobb/sql-cmd": "^0.2.1",
 		"express": "latest",
 		"otplib": "latest",
 		"typit": "latest"
@@ -21,7 +22,7 @@
 	"devDependencies": {
 		"@types/express": "latest",
 		"@types/jest": "latest",
-		"@types/node": "latest",
+		"@types/node": "^12.6.1",
 		"@types/otplib": "latest",
 		"jest": "latest",
 		"tslint": "latest",

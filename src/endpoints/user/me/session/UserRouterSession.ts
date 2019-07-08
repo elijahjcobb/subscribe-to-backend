@@ -39,8 +39,8 @@ import {Session} from "../../../../session/Session";
 import {SessionValidator} from "../../../../session/SessionValidator";
 import {BusinessOwner} from "../../../../objects/BusinessOwner";
 import {Business} from "../../../../objects/Business";
-import {ECSQLQuery} from "@elijahjcobb/nosql";
-import {UserRouterAccount} from "../account/UserRouterAccount";
+import {ECMQuery} from "@elijahjcobb/maria";
+
 
 export class UserRouterSession extends ECSRouter {
 
@@ -64,7 +64,7 @@ export class UserRouterSession extends ECSRouter {
 
 		} else {
 
-			const business: Business | undefined = await ECSQLQuery.getObjectWithId(Business, businessId, true);
+			const business: Business | undefined = await ECMQuery.getObjectWithId(Business, businessId, true);
 
 			if (business === undefined) throw ECSError.init().msg("The business you are referencing does not exist.").code(404).show();
 			if (session.props.userId === undefined) throw ECSError.init().msg("Your session does not have a userId.").show().code(400);

@@ -22,12 +22,12 @@
  *
  */
 
-import { ECSQLObject } from "@elijahjcobb/nosql";
+import { ECMObject } from "@elijahjcobb/maria";
 
 export interface AdminProps {
 }
 
-export class Admin extends ECSQLObject<AdminProps> {
+export class Admin extends ECMObject<AdminProps> {
 
 	public constructor() {
 

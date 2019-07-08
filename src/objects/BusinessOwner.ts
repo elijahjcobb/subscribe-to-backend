@@ -22,23 +22,17 @@
  *
  */
 
-import {
-	ECSQLCondition,
-	ECSQLFilter,
-	ECSQLFilterGroup,
-	ECSQLObject,
-	ECSQLOperator,
-	ECSQLQuery
-} from "@elijahjcobb/nosql";
+import { ECMQuery, ECMObject } from "@elijahjcobb/maria";
 import { ECArray } from "@elijahjcobb/collections";
 import { Business, BusinessProps } from "./Business";
+import {ECSQLCMD, ECSQLCMDQuery} from "@elijahjcobb/sql-cmd";
 
 export interface BusinessOwnerProps {
 	userId: string;
 	businessId: string;
 }
 
-export class BusinessOwner extends ECSQLObject<BusinessOwnerProps> {
+export class BusinessOwner extends ECMObject<BusinessOwnerProps> {
 
 	public constructor() {
 
@@ -51,11 +45,17 @@ export class BusinessOwner extends ECSQLObject<BusinessOwnerProps> {
 
 	public static async isUserIdOwnerOfBusinessId(userId: string, businessId: string): Promise<boolean> {
 
-		const query: ECSQLQuery<BusinessOwner, BusinessOwnerProps> = new ECSQLQuery(BusinessOwner, new ECSQLFilterGroup(
-			ECSQLCondition.And,
-			new ECSQLFilter("userId", ECSQLOperator.Equal, userId),
-			new ECSQLFilter("businessId", ECSQLOperator.Equal, businessId),
-		));
+		const query: ECMQuery<BusinessOwner, BusinessOwnerProps> = new ECMQuery(
+			BusinessOwner,
+			ECSQLCMD
+				.select()
+				.whereThese(
+					ECSQLCMDQuery
+						.and()
+						.where("userId", "=", userId)
+						.where("businessId", "=", businessId)
+				)
+		);
 
 		return await query.exists();
 
@@ -63,7 +63,9 @@ export class BusinessOwner extends ECSQLObject<BusinessOwnerProps> {
 
 	public static async getAllBusinessIdsForUserId(userId: string): Promise<ECArray<string>> {
 
-		const query: ECSQLQuery<BusinessOwner, BusinessOwnerProps> = new ECSQLQuery(BusinessOwner, new ECSQLFilter("userId", ECSQLOperator.Equal, userId));
+		const query: ECMQuery<BusinessOwner, BusinessOwnerProps> = new ECMQuery(BusinessOwner,
+			ECSQLCMD.select().where("userId", "=", userId)
+		);
 		const links: ECArray<BusinessOwner> = await query.getAllObjects();
 
 		return links.map((link: BusinessOwner) => { return link.props.businessId as string; });
@@ -73,7 +75,7 @@ export class BusinessOwner extends ECSQLObject<BusinessOwnerProps> {
 	public static async getAllBusinessesForUserId(userId: string): Promise<ECArray<Business>> {
 
 		const businessIds: ECArray<string> = await this.getAllBusinessIdsForUserId(userId);
-		return await ECSQLQuery.getObjectsWithIds(Business, ...businessIds.toNativeArray());
+		return await ECMQuery.getObjectsWithIds(Business, ...businessIds.toNativeArray());
 
 	}
 
