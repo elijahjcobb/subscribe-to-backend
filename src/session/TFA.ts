@@ -60,7 +60,7 @@ export class TFAToken {
 
 		} catch (e) {
 
-			console.log(e);
+			console.log(e.print());
 			throw ECSError.init().msg("Failed to encrypt TFAToken.");
 
 		}
