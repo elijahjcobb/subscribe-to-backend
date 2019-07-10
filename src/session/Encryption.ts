@@ -35,10 +35,13 @@ export class Encryption {
 		if (this.cipher === undefined) throw ECSError.init().msg("Tried to encrypt without first calling init.");
 
 		try {
+
 			return this.cipher.encrypt(data);
+
 		} catch (e) {
-			if (e instanceof ECErrorStack) e.print();
+
 			throw e;
+
 		}
 
 	}

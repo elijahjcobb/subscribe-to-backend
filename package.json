@@ -7,7 +7,7 @@
 	},
 	"dependencies": {
 		"@elijahjcobb/collections": "latest",
-		"@elijahjcobb/encryption": "latest",
+		"@elijahjcobb/encryption": "0.0.7",
 		"@elijahjcobb/error": "latest",
 		"@elijahjcobb/geo": "latest",
 		"@elijahjcobb/maria": "^0.1.1",
