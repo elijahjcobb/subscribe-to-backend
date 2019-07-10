@@ -51,6 +51,7 @@ export class Encryption {
 
 	public static init(password: Buffer): void {
 
+		console.log("Encryption init with password: ", password.toString("utf8"));
 		this.cipher = new ECCipher(password);
 
 	}
