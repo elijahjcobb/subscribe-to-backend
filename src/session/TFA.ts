@@ -54,13 +54,17 @@ export class TFAToken {
 		try {
 
 			const tokenString: string = JSON.stringify(tokenObject);
+			console.log(tokenString);
 			const tokenData: Buffer = Buffer.from(tokenString, "utf8");
+			console.log(tokenData);
 			const encryptedTokenData: Buffer = Encryption.encrypt(tokenData);
+			console.log(encryptedTokenData);
 			encrypted = encryptedTokenData.toString("hex");
+			console.log(encrypted);
 
 		} catch (e) {
 
-			console.log(e.print());
+			if (e.hasOwnProperty("print")) e.print();
 			throw ECSError.init().msg("Failed to encrypt TFAToken.");
 
 		}
