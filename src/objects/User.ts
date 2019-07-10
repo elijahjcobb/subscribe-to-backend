@@ -211,12 +211,8 @@ export class User extends ECMObject<UserProps> {
 			pepper: User.createPepper(salt, password).toString("base64")
 		};
 
-		console.log("1");
-
 		let tokenPayloadData: Buffer = Buffer.from(JSON.stringify(tokenPayload), "utf8");
 		let tokenPayloadString: string = tokenPayloadData.toString("base64");
-
-		console.log("2");
 
 		return new TFAToken(tokenPayloadString);
 

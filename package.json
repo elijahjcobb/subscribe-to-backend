@@ -13,7 +13,7 @@
 		"@elijahjcobb/maria": "^0.1.1",
 		"@elijahjcobb/prototypes": "latest",
 		"@elijahjcobb/request": "latest",
-		"@elijahjcobb/server": "latest",
+		"@elijahjcobb/server": "^0.1.2",
 		"@elijahjcobb/sql-cmd": "^0.2.1",
 		"express": "latest",
 		"otplib": "latest",
@@ -22,10 +22,10 @@
 	"devDependencies": {
 		"@types/express": "latest",
 		"@types/jest": "latest",
-		"@types/node": "^12.6.1",
+		"@types/node": "^12.6.2",
 		"@types/otplib": "latest",
 		"jest": "latest",
 		"tslint": "latest",
-		"typescript": "latest"
+		"typescript": "^3.5.3"
 	}
 }
