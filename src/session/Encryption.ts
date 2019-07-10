@@ -24,6 +24,7 @@
 
 import { ECCipher } from "@elijahjcobb/encryption";
 import { ECSError } from "@elijahjcobb/server";
+import {ECErrorStack} from "@elijahjcobb/error";
 
 export class Encryption {
 
@@ -36,7 +37,7 @@ export class Encryption {
 		try {
 			return this.cipher.encrypt(data);
 		} catch (e) {
-			console.log(e);
+			if (e instanceof ECErrorStack) e.print();
 			throw e;
 		}
 
