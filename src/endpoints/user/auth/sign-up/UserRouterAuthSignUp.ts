@@ -47,7 +47,11 @@ export class UserRouterAuthSignUp extends ECSRouter {
 		const email: string = req.get("email");
 		const password: string = req.get("password");
 
+		console.log("A");
+
 		const token: TFAToken = await User.getSignUpToken(email, password);
+
+		console.log("B");
 
 		return new ECSResponse({
 			token: token.encrypt(),

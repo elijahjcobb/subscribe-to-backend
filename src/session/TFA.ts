@@ -49,18 +49,26 @@ export class TFAToken {
 
 		console.log(`Simulated TFA SMS Message: '${this.code}' for user with id '${this.data}'.`);
 
+		let encrypted: string;
+
 		try {
 
 			const tokenString: string = JSON.stringify(tokenObject);
 			const tokenData: Buffer = Buffer.from(tokenString, "utf8");
 			const encryptedTokenData: Buffer = Encryption.encrypt(tokenData);
-			return encryptedTokenData.toString("hex");
+			encrypted = encryptedTokenData.toString("hex");
 
 		} catch (e) {
+
+			console.log("WTF DUDE");
 
 			throw ECSError.init().msg("Failed to encrypt TFAToken.");
 
 		}
+
+		console.log("GOOD?");
+
+		return encrypted;
 
 	}
 
