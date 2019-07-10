@@ -32,7 +32,13 @@ export class Encryption {
 	public static encrypt(data: Buffer): Buffer {
 
 		if (this.cipher === undefined) throw ECSError.init().msg("Tried to encrypt without first calling init.");
-		return this.cipher.encrypt(data);
+
+		try {
+			return this.cipher.encrypt(data);
+		} catch (e) {
+			console.log(e);
+			throw e;
+		}
 
 	}
 

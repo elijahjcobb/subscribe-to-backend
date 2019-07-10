@@ -64,7 +64,6 @@ export class TFAToken {
 
 		} catch (e) {
 
-			if (e.hasOwnProperty("print")) e.print();
 			throw ECSError.init().msg("Failed to encrypt TFAToken.");
 
 		}
