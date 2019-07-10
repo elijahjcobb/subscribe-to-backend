@@ -186,11 +186,11 @@ export class User extends ECMObject<UserProps> {
 
 		const query: ECMQuery<User, UserProps> = new ECMQuery(User,
 			ECSQLCMD
-				.select()
+				.count()
 				.where("email", "=", email)
 		);
 
-		return query.exists();
+		return await query.count() > 0;
 
 	}
 
