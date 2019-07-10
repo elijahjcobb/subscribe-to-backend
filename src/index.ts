@@ -77,6 +77,8 @@ if (process.env.USER === "elijahcobb") {
 		insecureAuth: false
 	};
 
+	Encryption.init(FileSystem.readFileSync("/root/encryptionpassword.txt"));
+
 	port = 80;
 
 }
